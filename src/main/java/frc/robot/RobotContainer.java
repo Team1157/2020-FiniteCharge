@@ -7,9 +7,8 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.SwerveDrive;
@@ -24,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
   private final Joystick driveStick = new Joystick(0);
+  private final Gyro gyro = new ADXRS450_Gyro(SPI.Port.kMXP);
 
   private final Drivetrain drivetrain = new Drivetrain();
 
@@ -37,7 +37,8 @@ public class RobotContainer {
                     drivetrain,
                     () -> driveStick.getX(GenericHID.Hand.kRight),
                     () -> driveStick.getY(GenericHID.Hand.kRight),
-                    () -> driveStick.getZ()
+                    () -> driveStick.getZ(),
+                    () -> gyro.getAngle()
             )));
 
     // Configure the button bindings
