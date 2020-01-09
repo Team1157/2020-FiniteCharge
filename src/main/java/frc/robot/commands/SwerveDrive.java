@@ -7,24 +7,35 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.Drivetrain;
+
+import java.util.function.DoubleSupplier;
+
 
 /**
- * An example command that uses an example subsystem.
+ * Point the wheels straight forwards and drives like a standard differential drive.
  */
-public class ExampleCommand extends CommandBase {
+public class SwerveDrive extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final ExampleSubsystem m_subsystem;
+  private final Drivetrain drivetrain;
+
+  private DoubleSupplier joystickX;
+  private DoubleSupplier joystickY;
+  private DoubleSupplier joystickZ;
 
   /**
-   * Creates a new ExampleCommand.
+   * Creates a new SwerveDrive.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(ExampleSubsystem subsystem) {
-    m_subsystem = subsystem;
-    // Use addRequirements() here to declare subsystem dependencies.
+  public SwerveDrive(Drivetrain subsystem, DoubleSupplier getJoystickX, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ) {
+    drivetrain = subsystem;
+    joystickX = getJoystickX;
+    joystickY = getJoystickY;
+    joystickZ = getJoystickZ;
+
+    //Declare dependency on the drivetrain subsystem
     addRequirements(subsystem);
   }
 
@@ -36,6 +47,7 @@ public class ExampleCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
   }
 
   // Called once the command ends or is interrupted.
