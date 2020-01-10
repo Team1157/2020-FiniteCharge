@@ -39,7 +39,10 @@ public class ArcadeDrive extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //TODO point every wheel forwards
+    //Point each wheel straight forwards
+    for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
+      drivetrain.setDesiredWheelAngle(wheel, 0);
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

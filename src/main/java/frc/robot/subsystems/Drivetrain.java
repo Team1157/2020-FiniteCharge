@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX; //Note: add build/libs/FRC 2020 to your classpath.
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import frc.robot.Constants;
 
@@ -65,7 +66,10 @@ public class Drivetrain extends SubsystemBase {
    * Creates a new Drivetrain.
    */
   public Drivetrain() {
-
+    //Configure the Talons for easy access to the encoders
+    for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    }
   }
 
   @Override
@@ -96,10 +100,9 @@ public class Drivetrain extends SubsystemBase {
    * Stop the drive motors immediately
    */
   public void stopDriveMotors() {
-    setDriveMotorSpeed(MotorLocation.FRONT_LEFT, 0);
-    setDriveMotorSpeed(MotorLocation.FRONT_RIGHT, 0);
-    setDriveMotorSpeed(MotorLocation.BACK_LEFT, 0);
-    setDriveMotorSpeed(MotorLocation.BACK_RIGHT, 0);
+    for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+      setDriveMotorSpeed(loc, 0);
+    }
   }
 
   /**
@@ -107,9 +110,32 @@ public class Drivetrain extends SubsystemBase {
    */
   public void stopAll() {
     stopDriveMotors();
-    steeringMotors.get(MotorLocation.FRONT_LEFT).set(0);
-    steeringMotors.get(MotorLocation.FRONT_RIGHT).set(0);
-    steeringMotors.get(MotorLocation.BACK_LEFT).set(0);
-    steeringMotors.get(MotorLocation.BACK_RIGHT).set(0);
+    for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+      steeringMotors.get(loc).set(0);
+    }
+  }
+
+  /**
+   * Calculate the angle of one of the swerve wheels based on its encoder position
+   * @param wheel The wheel to find the angle of
+   * @return The calculated angle, in degrees, clockwise from the initial position, from 0 to 360
+   */
+  public double getWheelAngle(MotorLocation wheel) {
+    WPI_TalonSRX talon = steeringMotors.get(wheel);
+
+    //Get the position of the encoder, in raw units
+    int encoderTicks = talon.getSelectedSensorPosition();
+
+    //Convert the encoder position to a wheel angle
+    return (encoderTicks / Constants.steeringEncoderPulsesPerRevolution / Constants.steeringGearRatio * 360) % 360;
+  }
+
+  /**
+   * Instruct the talon's integrated PID loop to rotate the wheel to a specific angle
+   * @param wheel The wheel to control
+   * @param angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
+   */
+  public void setDesiredWheelAngle(MotorLocation wheel, double angle) {
+    //TODO Change the setpoint for the talon PID
   }
 }

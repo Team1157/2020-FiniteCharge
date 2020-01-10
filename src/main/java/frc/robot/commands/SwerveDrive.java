@@ -58,6 +58,11 @@ public class SwerveDrive extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+  }
+
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
     //Create a WPILib object representing the desired velocity of the robot
     ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             joystickY.getAsDouble() * 2.0,
@@ -81,14 +86,11 @@ public class SwerveDrive extends CommandBase {
       drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 2.0);
     }
 
-    //TODO: Set steering angles
-
-  }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-
+    //Set the desired steering angles
+    for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
+      double rawAngle = moduleStates.get(wheel).angle.getDegrees();
+      drivetrain.setDesiredWheelAngle(wheel, 90 - rawAngle);
+    }
   }
 
   // Called once the command ends or is interrupted.
