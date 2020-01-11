@@ -19,7 +19,7 @@ public class ArcadeDrive extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Drivetrain drivetrain;
 
-  private DoubleSupplier joystickX;
+  private DoubleSupplier joystickY;
   private DoubleSupplier joystickZ;
 
   /**
@@ -27,9 +27,9 @@ public class ArcadeDrive extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ArcadeDrive(Drivetrain subsystem, DoubleSupplier getJoystickX, DoubleSupplier getJoystickZ) {
+  public ArcadeDrive(Drivetrain subsystem, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ) {
     drivetrain = subsystem;
-    joystickX = getJoystickX;
+    joystickY = getJoystickY;
     joystickZ = getJoystickZ;
 
     //Declare dependency on the drivetrain subsystem
@@ -48,7 +48,7 @@ public class ArcadeDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    drivetrain.arcadeDrive(joystickX.getAsDouble(), joystickZ.getAsDouble());
+    drivetrain.arcadeDrive(-joystickY.getAsDouble(), joystickZ.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.

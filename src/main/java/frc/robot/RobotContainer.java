@@ -31,6 +31,7 @@ public class RobotContainer {
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    /*
     drivetrain.setDefaultCommand((
             //Allows the swerve drive command to access the joystick inputs
             new SwerveDrive(
@@ -40,6 +41,12 @@ public class RobotContainer {
                     () -> driveStick.getZ(),
                     () -> gyro.getAngle()
             )));
+    */
+    drivetrain.setDefaultCommand(new ArcadeDrive(
+            drivetrain,
+            () -> driveStick.getY(GenericHID.Hand.kRight),
+            () -> driveStick.getZ()
+    ));
 
     // Configure the button bindings
     configureButtonBindings();

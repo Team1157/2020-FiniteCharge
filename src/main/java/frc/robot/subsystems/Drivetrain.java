@@ -42,12 +42,14 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new WPI_VictorSPX(Constants.backRightDriveMotorNumber)
   );
 
+  /*
   private final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of(
           MotorLocation.FRONT_LEFT, new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
           MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
   );
+   */
 
   private final SpeedControllerGroup leftMotors = new SpeedControllerGroup(
           driveMotors.get(MotorLocation.FRONT_LEFT),
@@ -67,9 +69,11 @@ public class Drivetrain extends SubsystemBase {
    */
   public Drivetrain() {
     //Configure the Talons for easy access to the encoders
+    /*
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
     }
+     */
   }
 
   @Override
@@ -110,9 +114,12 @@ public class Drivetrain extends SubsystemBase {
    */
   public void stopAll() {
     stopDriveMotors();
+    /*
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       steeringMotors.get(loc).set(0);
     }
+
+     */
   }
 
   /**
@@ -120,6 +127,7 @@ public class Drivetrain extends SubsystemBase {
    * @param wheel The wheel to find the angle of
    * @return The calculated angle, in degrees, clockwise from the initial position, from 0 to 360
    */
+  /*
   public double getWheelAngle(MotorLocation wheel) {
     WPI_TalonSRX talon = steeringMotors.get(wheel);
 
@@ -129,6 +137,7 @@ public class Drivetrain extends SubsystemBase {
     //Convert the encoder position to a wheel angle
     return (encoderTicks / Constants.steeringEncoderPulsesPerRevolution / Constants.steeringGearRatio * 360) % 360;
   }
+   */
 
   /**
    * Instruct the talon's integrated PID loop to rotate the wheel to a specific angle

@@ -20,13 +20,13 @@ public final class Constants {
     public static double steeringEncoderPulsesPerRevolution = 7.0/4;
 
     public static int frontLeftDriveMotorNumber = 0;
-    public static int frontRightDriveMotorNumber = 0;
-    public static int backLeftDriveMotorNumber = 0;
-    public static int backRightDriveMotorNumber = 0;
+    public static int frontRightDriveMotorNumber = 1;
+    public static int backLeftDriveMotorNumber = 2;
+    public static int backRightDriveMotorNumber = 3;
     public static int frontLeftSteeringMotorNumber = 0;
     public static int frontRightSteeringMotorNumber = 0;
     public static int backLeftSteeringMotorNumber = 0;
     public static int backRightSteeringMotorNumber = 0;
 
-    public static int driveModeToggleButton = 0;
+    public static int driveModeToggleButton = 1;
 }
