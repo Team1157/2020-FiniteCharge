@@ -16,9 +16,6 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static double steeringGearRatio = 71.0 / 48.0 * 40.0;
-    public static double steeringEncoderPulsesPerRevolution = 7.0/4;
-
     public static int frontLeftDriveMotorNumber = 0;
     public static int frontRightDriveMotorNumber = 1;
     public static int backLeftDriveMotorNumber = 2;

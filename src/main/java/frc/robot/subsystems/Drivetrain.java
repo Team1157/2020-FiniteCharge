@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import java.util.Map;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -42,14 +43,12 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new WPI_VictorSPX(Constants.backRightDriveMotorNumber)
   );
 
-  /*
   private final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of(
           MotorLocation.FRONT_LEFT, new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
           MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
   );
-   */
 
   private final SpeedControllerGroup leftMotors = new SpeedControllerGroup(
           driveMotors.get(MotorLocation.FRONT_LEFT),
@@ -69,11 +68,10 @@ public class Drivetrain extends SubsystemBase {
    */
   public Drivetrain() {
     //Configure the Talons for easy access to the encoders
-    /*
+
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.Analog);
     }
-     */
   }
 
   @Override
@@ -114,12 +112,10 @@ public class Drivetrain extends SubsystemBase {
    */
   public void stopAll() {
     stopDriveMotors();
-    /*
-    for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-      steeringMotors.get(loc).set(0);
-    }
 
-     */
+    for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+      steeringMotors.get(loc).set(ControlMode.PercentOutput, 0);
+    }
   }
 
   /**
@@ -127,7 +123,6 @@ public class Drivetrain extends SubsystemBase {
    * @param wheel The wheel to find the angle of
    * @return The calculated angle, in degrees, clockwise from the initial position, from 0 to 360
    */
-  /*
   public double getWheelAngle(MotorLocation wheel) {
     WPI_TalonSRX talon = steeringMotors.get(wheel);
 
@@ -135,9 +130,9 @@ public class Drivetrain extends SubsystemBase {
     int encoderTicks = talon.getSelectedSensorPosition();
 
     //Convert the encoder position to a wheel angle
-    return (encoderTicks / Constants.steeringEncoderPulsesPerRevolution / Constants.steeringGearRatio * 360) % 360;
+    //TODO Test to see if this needs to be reversed
+    return encoderTicks / 1024.0 * 360;
   }
-   */
 
   /**
    * Instruct the talon's integrated PID loop to rotate the wheel to a specific angle
@@ -145,6 +140,10 @@ public class Drivetrain extends SubsystemBase {
    * @param angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
    */
   public void setDesiredWheelAngle(MotorLocation wheel, double angle) {
-    //TODO Change the setpoint for the talon PID
+    WPI_TalonSRX talon = steeringMotors.get(wheel);
+
+    //TODO Test to see if this needs to be reversed
+    double desiredEncoderPosition = angle * 1024 / 360.0;
+    talon.set(ControlMode.Position, desiredEncoderPosition);
   }
 }
