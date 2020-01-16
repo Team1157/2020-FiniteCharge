@@ -25,5 +25,7 @@ public final class Constants {
     public static int backLeftSteeringMotorNumber = 0;
     public static int backRightSteeringMotorNumber = 0;
 
+    public static int visonLightsRelayPort = 0;
+
     public static int driveModeToggleButton = 1;
 }
