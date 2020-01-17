@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -23,6 +24,7 @@ public class VisionLights extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putData("Relay", relay);
     // This method will be called once per scheduler run
   }
 }

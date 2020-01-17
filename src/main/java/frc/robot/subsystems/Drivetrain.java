@@ -70,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
     //Configure the Talons for easy access to the encoders
 
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.Analog);
+      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
     }
   }
 
@@ -131,19 +131,26 @@ public class Drivetrain extends SubsystemBase {
 
     //Convert the encoder position to a wheel angle
     //TODO Test to see if this needs to be reversed
-    return encoderTicks / 1024.0 * 360;
+    return (encoderTicks / Constants.steeringEncoderPulsesPerRevolution / Constants.steeringGearRatio * 360) % 360;
   }
 
   /**
    * Instruct the talon's integrated PID loop to rotate the wheel to a specific angle
    * @param wheel The wheel to control
-   * @param angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
+   * @param target_angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
    */
-  public void setDesiredWheelAngle(MotorLocation wheel, double angle) {
+  public void setDesiredWheelAngle(MotorLocation wheel, double target_angle) {
     WPI_TalonSRX talon = steeringMotors.get(wheel);
+    double current_angle = getWheelAngle(wheel);
+    int current_encoder_position = talon.getSelectedSensorPosition();
 
-    //TODO Test to see if this needs to be reversed
-    double desiredEncoderPosition = angle * 1024 / 360.0;
+    double difference = target_angle - current_angle;
+    if (Math.abs(difference) > Math.abs(360 - difference)) {
+      //Wrap around between 0 and 360
+      difference = Math.copySign(360 - Math.abs(difference), -difference);
+    }
+
+    double desiredEncoderPosition = current_encoder_position + difference * Constants.steeringGearRatio * Constants.steeringEncoderPulsesPerRevolution;
     talon.set(ControlMode.Position, desiredEncoderPosition);
   }
 }

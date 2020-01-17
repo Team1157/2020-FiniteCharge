@@ -8,12 +8,16 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
+import frc.robot.commands.LightsOff;
+import frc.robot.commands.LightsOn;
 import frc.robot.commands.SwerveDrive;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.VisionLights;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -23,14 +27,17 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
   private final Joystick driveStick = new Joystick(0);
-  private final Gyro gyro = new ADXRS450_Gyro(SPI.Port.kMXP);
+  private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
-  private final Drivetrain drivetrain = new Drivetrain();
+  //private final Drivetrain drivetrain = new Drivetrain();
+  private final VisionLights visionLights = new VisionLights();
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    //SmartDashboard.putData("Drivetrain", drivetrain);
+    SmartDashboard.putData("Gyro", gyro);
     /*
     drivetrain.setDefaultCommand((
             //Allows the swerve drive command to access the joystick inputs
@@ -42,6 +49,7 @@ public class RobotContainer {
                     () -> gyro.getAngle()
             )));
     */
+    /*
     drivetrain.setDefaultCommand(new ArcadeDrive(
             drivetrain,
             () -> driveStick.getY(GenericHID.Hand.kRight),
@@ -50,6 +58,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+     */
   }
 
   /**
@@ -60,11 +69,13 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     JoystickButton driveModeToggleButton = new JoystickButton(driveStick, Constants.driveModeToggleButton);
+    /*
     driveModeToggleButton.toggleWhenPressed(new ArcadeDrive(
             drivetrain,
             () -> driveStick.getX(GenericHID.Hand.kRight),
             () -> driveStick.getZ()
     ));
+     */
   }
 
 
