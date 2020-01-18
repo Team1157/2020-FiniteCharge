@@ -13,6 +13,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX; //Note: add build/libs/FRC 2020 to your classpath.
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -70,13 +72,18 @@ public class Drivetrain extends SubsystemBase {
     //Configure the Talons for easy access to the encoders
 
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-      steeringMotors.get(loc).configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+      WPI_TalonSRX talon = steeringMotors.get(loc);
+      talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+      talon.config_kP(0, 180);
+      talon.config_kD(0, 1000);
+      talon.config_kI(0, 0);
     }
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Front Left Angle", getWheelAngle(MotorLocation.FRONT_LEFT));
+    SmartDashboard.putNumber("Front Left Encoder", steeringMotors.get(MotorLocation.FRONT_LEFT).getSelectedSensorPosition());
   }
 
   /**
@@ -131,7 +138,7 @@ public class Drivetrain extends SubsystemBase {
 
     //Convert the encoder position to a wheel angle
     //TODO Test to see if this needs to be reversed
-    return (encoderTicks / Constants.steeringEncoderPulsesPerRevolution / Constants.steeringGearRatio * 360) % 360;
+    return (encoderTicks / Constants.pulsesPerRevolution * 360) % 360;
   }
 
   /**
@@ -150,7 +157,7 @@ public class Drivetrain extends SubsystemBase {
       difference = Math.copySign(360 - Math.abs(difference), -difference);
     }
 
-    double desiredEncoderPosition = current_encoder_position + difference * Constants.steeringGearRatio * Constants.steeringEncoderPulsesPerRevolution;
+    double desiredEncoderPosition = current_encoder_position + difference * Constants.pulsesPerRevolution / 360.0;
     talon.set(ControlMode.Position, desiredEncoderPosition);
   }
 }

@@ -29,14 +29,13 @@ public class RobotContainer {
   private final Joystick driveStick = new Joystick(0);
   private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
-  //private final Drivetrain drivetrain = new Drivetrain();
+  private final Drivetrain drivetrain = new Drivetrain();
   private final VisionLights visionLights = new VisionLights();
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    //SmartDashboard.putData("Drivetrain", drivetrain);
     SmartDashboard.putData("Gyro", gyro);
     /*
     drivetrain.setDefaultCommand((
