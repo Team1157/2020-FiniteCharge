@@ -11,10 +11,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ArcadeDrive;
-import frc.robot.commands.LightsOff;
-import frc.robot.commands.LightsOn;
-import frc.robot.commands.SwerveDrive;
+import frc.robot.commands.*;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.VisionLights;
@@ -37,8 +34,17 @@ public class RobotContainer {
    */
   public RobotContainer() {
     SmartDashboard.putData("Gyro", gyro);
-    /*
-    drivetrain.setDefaultCommand((
+    SmartDashboard.putData("Drivetrain", drivetrain);
+    SmartDashboard.putData("Swerve Test",
+            new SwerveTest(
+                    drivetrain,
+                    () -> driveStick.getX(GenericHID.Hand.kRight),
+                    () -> driveStick.getY(GenericHID.Hand.kRight),
+                    () -> driveStick.getZ(),
+                    () -> gyro.getAngle()
+            ));
+
+    drivetrain.setDefaultCommand(
             //Allows the swerve drive command to access the joystick inputs
             new SwerveDrive(
                     drivetrain,
@@ -46,8 +52,7 @@ public class RobotContainer {
                     () -> driveStick.getY(GenericHID.Hand.kRight),
                     () -> driveStick.getZ(),
                     () -> gyro.getAngle()
-            )));
-    */
+            ));
     /*
     drivetrain.setDefaultCommand(new ArcadeDrive(
             drivetrain,

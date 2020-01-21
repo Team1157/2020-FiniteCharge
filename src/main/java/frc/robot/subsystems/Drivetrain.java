@@ -32,10 +32,10 @@ public class Drivetrain extends SubsystemBase {
 
   //Stores the location of each drive wheel, in meters. Important for swerve drive math.
   public static final Map<MotorLocation, Translation2d> wheelCoordinates = Map.of(
-          MotorLocation.FRONT_LEFT, new Translation2d(0, 0),
-          MotorLocation.FRONT_RIGHT, new Translation2d(0, 0),
-          MotorLocation.BACK_LEFT, new Translation2d(0, 0),
-          MotorLocation.BACK_RIGHT, new Translation2d(0, 0)
+          MotorLocation.FRONT_LEFT, new Translation2d(0.25, -0.25),
+          MotorLocation.FRONT_RIGHT, new Translation2d(0.25, 0.25),
+          MotorLocation.BACK_LEFT, new Translation2d(-0.25, -0.25),
+          MotorLocation.BACK_RIGHT, new Translation2d(-0.25, 0.25)
   );
 
   private final Map<MotorLocation, WPI_VictorSPX> driveMotors =  Map.of(
@@ -45,7 +45,7 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new WPI_VictorSPX(Constants.backRightDriveMotorNumber)
   );
 
-  private final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of(
+  public final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of( //TODO Change to private
           MotorLocation.FRONT_LEFT, new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
@@ -63,7 +63,7 @@ public class Drivetrain extends SubsystemBase {
   );
 
   //Differential drivetrain object used when driving in arcade mode
-  private final DifferentialDrive differentialDrive = new DifferentialDrive(leftMotors, rightMotors);
+  //private final DifferentialDrive differentialDrive = new DifferentialDrive(leftMotors, rightMotors);
 
   /**
    * Creates a new Drivetrain.
@@ -74,16 +74,25 @@ public class Drivetrain extends SubsystemBase {
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       WPI_TalonSRX talon = steeringMotors.get(loc);
       talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-      talon.config_kP(0, 180);
-      talon.config_kD(0, 1000);
+      talon.config_kP(0, 10);
+      talon.config_kD(0, 0);
       talon.config_kI(0, 0);
+      talon.configAllowableClosedloopError(0, 5);
+      talon.configClosedloopRamp(0);
     }
+
+    steeringMotors.get(MotorLocation.FRONT_LEFT).setInverted(false);
+    steeringMotors.get(MotorLocation.FRONT_RIGHT).setInverted(true);
+    steeringMotors.get(MotorLocation.BACK_LEFT).setInverted(false);
+    steeringMotors.get(MotorLocation.BACK_RIGHT).setInverted(true);
   }
 
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Front Left Angle", getWheelAngle(MotorLocation.FRONT_LEFT));
     SmartDashboard.putNumber("Front Left Encoder", steeringMotors.get(MotorLocation.FRONT_LEFT).getSelectedSensorPosition());
+    SmartDashboard.putNumber("Front Right Angle", getWheelAngle(MotorLocation.FRONT_RIGHT));
+    SmartDashboard.putNumber("Front Right Encoder", steeringMotors.get(MotorLocation.FRONT_RIGHT).getSelectedSensorPosition());
   }
 
   /**
@@ -102,7 +111,7 @@ public class Drivetrain extends SubsystemBase {
    * @param rotation The desired angular velocity, from -1 to 1
    */
   public void arcadeDrive(double forward, double rotation) {
-    differentialDrive.arcadeDrive(forward, rotation);
+    //differentialDrive.arcadeDrive(forward, rotation);
   }
 
   /**
@@ -126,9 +135,23 @@ public class Drivetrain extends SubsystemBase {
   }
 
   /**
+   * Find the displacement between the two angles with the smallest magnitude, assuming 0 degrees is equal to 360 degrees
+   * @param angle1 The value of the initial angle, in degrees
+   * @param angle2 THe value of the final angle, in degrees
+   * @return The calculted displacement, in degrees
+   */
+  public double getAngleDifference(double angle1, double angle2) {
+    if (Math.abs(angle2 - angle1) <= 360 - Math.abs(angle2 - angle1)) {
+      return angle2 - angle1;
+    } else {
+      return Math.copySign(360 - Math.abs(angle1 - angle2), angle1 - angle2);
+    }
+  }
+
+  /**
    * Calculate the angle of one of the swerve wheels based on its encoder position
    * @param wheel The wheel to find the angle of
-   * @return The calculated angle, in degrees, clockwise from the initial position, from 0 to 360
+   * @return The calculated angle, in degrees, counterclockwise from the initial position, from 0 to 360
    */
   public double getWheelAngle(MotorLocation wheel) {
     WPI_TalonSRX talon = steeringMotors.get(wheel);
@@ -138,7 +161,9 @@ public class Drivetrain extends SubsystemBase {
 
     //Convert the encoder position to a wheel angle
     //TODO Test to see if this needs to be reversed
-    return (encoderTicks / Constants.pulsesPerRevolution * 360) % 360;
+    double angle =  (encoderTicks / Constants.pulsesPerRevolution * 360) % 360;
+    if (angle < 0) {angle += 360;}
+    return angle;
   }
 
   /**
@@ -147,17 +172,16 @@ public class Drivetrain extends SubsystemBase {
    * @param target_angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
    */
   public void setDesiredWheelAngle(MotorLocation wheel, double target_angle) {
+    target_angle = target_angle % 360;
+    if (target_angle < 0) {target_angle += 360;}
+
     WPI_TalonSRX talon = steeringMotors.get(wheel);
     double current_angle = getWheelAngle(wheel);
     int current_encoder_position = talon.getSelectedSensorPosition();
 
-    double difference = target_angle - current_angle;
-    if (Math.abs(difference) > Math.abs(360 - difference)) {
-      //Wrap around between 0 and 360
-      difference = Math.copySign(360 - Math.abs(difference), -difference);
-    }
+    double displacement = getAngleDifference(current_angle, target_angle);
 
-    double desiredEncoderPosition = current_encoder_position + difference * Constants.pulsesPerRevolution / 360.0;
+    double desiredEncoderPosition = current_encoder_position + displacement * Constants.pulsesPerRevolution / 360.0;
     talon.set(ControlMode.Position, desiredEncoderPosition);
   }
 }

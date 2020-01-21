@@ -63,11 +63,18 @@ public class SwerveDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double x = joystickX.getAsDouble();
+    double y = joystickY.getAsDouble();
+    double z = joystickZ.getAsDouble();
+    if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(z) < 0.1) {
+      return;
+    }
+
     //Create a WPILib object representing the desired velocity of the robot
     ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             joystickY.getAsDouble() * 2.0,
             joystickX.getAsDouble() * -2.0,
-            joystickZ.getAsDouble() * Math.PI / 2.0,
+            joystickZ.getAsDouble() * Math.PI * 2,
             Rotation2d.fromDegrees(gyro.getAsDouble())
     );
 
@@ -89,7 +96,7 @@ public class SwerveDrive extends CommandBase {
     //Set the desired steering angles
     for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
       double rawAngle = moduleStates.get(wheel).angle.getDegrees();
-      drivetrain.setDesiredWheelAngle(wheel, 90 - rawAngle);
+      drivetrain.setDesiredWheelAngle(wheel, -rawAngle);
     }
   }
 
