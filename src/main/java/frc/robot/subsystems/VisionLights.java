@@ -24,7 +24,6 @@ public class VisionLights extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putData("Relay", relay);
     // This method will be called once per scheduler run
   }
 }

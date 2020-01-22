@@ -8,7 +8,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
@@ -53,16 +52,9 @@ public class RobotContainer {
                     () -> driveStick.getZ(),
                     () -> gyro.getAngle()
             ));
-    /*
-    drivetrain.setDefaultCommand(new ArcadeDrive(
-            drivetrain,
-            () -> driveStick.getY(GenericHID.Hand.kRight),
-            () -> driveStick.getZ()
-    ));
-
     // Configure the button bindings
     configureButtonBindings();
-     */
+
   }
 
   /**
@@ -72,14 +64,6 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    JoystickButton driveModeToggleButton = new JoystickButton(driveStick, Constants.driveModeToggleButton);
-    /*
-    driveModeToggleButton.toggleWhenPressed(new ArcadeDrive(
-            drivetrain,
-            () -> driveStick.getX(GenericHID.Hand.kRight),
-            () -> driveStick.getZ()
-    ));
-     */
   }
 
 

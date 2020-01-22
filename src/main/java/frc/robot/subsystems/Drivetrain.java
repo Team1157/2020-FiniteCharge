@@ -11,7 +11,6 @@ import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,24 +51,11 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
   );
 
-  private final SpeedControllerGroup leftMotors = new SpeedControllerGroup(
-          driveMotors.get(MotorLocation.FRONT_LEFT),
-          driveMotors.get(MotorLocation.BACK_LEFT)
-  );
-
-  private final SpeedControllerGroup rightMotors = new SpeedControllerGroup(
-          driveMotors.get(MotorLocation.FRONT_RIGHT),
-          driveMotors.get(MotorLocation.BACK_RIGHT)
-  );
-
-  //Differential drivetrain object used when driving in arcade mode
-  //private final DifferentialDrive differentialDrive = new DifferentialDrive(leftMotors, rightMotors);
-
   /**
    * Creates a new Drivetrain.
    */
   public Drivetrain() {
-    //Configure the Talons for easy access to the encoders
+    //Configure the Talons for PID control
 
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       WPI_TalonSRX talon = steeringMotors.get(loc);
@@ -89,10 +75,6 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Front Left Angle", getWheelAngle(MotorLocation.FRONT_LEFT));
-    SmartDashboard.putNumber("Front Left Encoder", steeringMotors.get(MotorLocation.FRONT_LEFT).getSelectedSensorPosition());
-    SmartDashboard.putNumber("Front Right Angle", getWheelAngle(MotorLocation.FRONT_RIGHT));
-    SmartDashboard.putNumber("Front Right Encoder", steeringMotors.get(MotorLocation.FRONT_RIGHT).getSelectedSensorPosition());
   }
 
   /**

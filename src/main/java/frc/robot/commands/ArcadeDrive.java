@@ -13,7 +13,7 @@ import frc.robot.subsystems.Drivetrain;
 
 
 /**
- * Point the wheels straight forwards and drives like a standard differential drive.
+ * Point the wheels straight forwards and drive like a standard differential drive.
  */
 public class ArcadeDrive extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
