@@ -93,7 +93,17 @@ public class Drivetrain extends SubsystemBase {
    * @param rotation The desired angular velocity, from -1 to 1
    */
   public void arcadeDrive(double forward, double rotation) {
-    //differentialDrive.arcadeDrive(forward, rotation);
+    double leftSpeed = forward - rotation;
+    double rightSpeed = forward + rotation;
+
+    double max = Math.max(1, Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed)));
+    leftSpeed /= max;
+    rightSpeed /= max;
+
+    setDriveMotorSpeed(MotorLocation.FRONT_LEFT, leftSpeed);
+    setDriveMotorSpeed(MotorLocation.BACK_LEFT, leftSpeed);
+    setDriveMotorSpeed(MotorLocation.FRONT_RIGHT, rightSpeed);
+    setDriveMotorSpeed(MotorLocation.BACK_RIGHT, rightSpeed);
   }
 
   /**
