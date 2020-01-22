@@ -36,18 +36,25 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new Translation2d(-0.25, 0.25)
   );
 
-  private final Map<MotorLocation, WPI_VictorSPX> driveMotors =  Map.of(
+  private final Map<MotorLocation, WPI_VictorSPX> driveMotors = Map.of(
           MotorLocation.FRONT_LEFT, new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
           MotorLocation.BACK_RIGHT, new WPI_VictorSPX(Constants.backRightDriveMotorNumber)
   );
 
-  private final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of(
+  private final Map<MotorLocation, WPI_TalonSRX> steeringMotors = Map.of(
           MotorLocation.FRONT_LEFT, new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
           MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
+  );
+
+  private Map<MotorLocation, Boolean> driveMotorInverted = Map.of(
+          MotorLocation.FRONT_LEFT, false,
+          MotorLocation.FRONT_RIGHT, false,
+          MotorLocation.BACK_LEFT, false,
+          MotorLocation.BACK_RIGHT, false
   );
 
   /**
@@ -81,6 +88,9 @@ public class Drivetrain extends SubsystemBase {
    * @param speed the desired motor speed, from -1 to 1
    */
   public void setDriveMotorSpeed(MotorLocation motor, double speed) {
+    if (driveMotorInverted.get(motor)) {
+      speed = -speed;
+    }
     driveMotors.get(motor).set(speed);
   }
 
@@ -150,7 +160,6 @@ public class Drivetrain extends SubsystemBase {
     int encoderTicks = talon.getSelectedSensorPosition();
 
     //Convert the encoder position to a wheel angle
-    //TODO Test to see if this needs to be reversed
     double angle =  (encoderTicks / Constants.pulsesPerRevolution * 360) % 360;
     if (angle < 0) {angle += 360;}
     return angle;
@@ -170,6 +179,13 @@ public class Drivetrain extends SubsystemBase {
     int current_encoder_position = talon.getSelectedSensorPosition();
 
     double displacement = getAngleDifference(current_angle, target_angle);
+    if (Math.abs(displacement) < 90) {
+      driveMotorInverted.put(wheel, false);
+    } else {
+      driveMotorInverted.put(wheel, true);
+      target_angle = (target_angle + 180) % 360;
+      displacement = getAngleDifference(current_angle, target_angle);
+    }
 
     double desiredEncoderPosition = current_encoder_position + displacement * Constants.pulsesPerRevolution / 360.0;
     talon.set(ControlMode.Position, desiredEncoderPosition);
