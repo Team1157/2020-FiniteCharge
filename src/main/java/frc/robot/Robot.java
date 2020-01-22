@@ -96,6 +96,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    robotContainer.updateInputMode();
   }
 
   @Override
@@ -109,5 +110,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    robotContainer.updateInputMode();
   }
 }

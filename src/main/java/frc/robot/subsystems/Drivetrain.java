@@ -10,7 +10,6 @@ package frc.robot.subsystems;
 import java.util.Map;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,7 +43,7 @@ public class Drivetrain extends SubsystemBase {
           MotorLocation.BACK_RIGHT, new WPI_VictorSPX(Constants.backRightDriveMotorNumber)
   );
 
-  public final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of( //TODO Change to private
+  private final Map<MotorLocation, WPI_TalonSRX> steeringMotors =  Map.of(
           MotorLocation.FRONT_LEFT, new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber),
           MotorLocation.FRONT_RIGHT, new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
           MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
@@ -56,7 +55,6 @@ public class Drivetrain extends SubsystemBase {
    */
   public Drivetrain() {
     //Configure the Talons for PID control
-
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       WPI_TalonSRX talon = steeringMotors.get(loc);
       talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);

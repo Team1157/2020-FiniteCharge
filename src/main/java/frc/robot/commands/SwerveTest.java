@@ -29,21 +29,21 @@ public class SwerveTest extends CommandBase {
 
   private final Drivetrain drivetrain;
 
-  private DoubleSupplier joystickX;
-  private DoubleSupplier joystickY;
-  private DoubleSupplier joystickZ;
+  private DoubleSupplier rightInput;
+  private DoubleSupplier forwardInput;
+  private DoubleSupplier rotationInput;
   private DoubleSupplier gyro;
 
   /**
-   * Creates a new SwerveDrive.
+   * Creates a new SwerveTest.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public SwerveTest(Drivetrain subsystem, DoubleSupplier getJoystickX, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ, DoubleSupplier getGyroAngle) {
+  public SwerveTest(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation, DoubleSupplier getGyroAngle) {
     drivetrain = subsystem;
-    joystickX = getJoystickX;
-    joystickY = getJoystickY;
-    joystickZ = getJoystickZ;
+    rightInput = getRight;
+    forwardInput = getForward;
+    rotationInput = getRotation;
     gyro = getGyroAngle;
 
     //Declare dependency on the drivetrain subsystem
@@ -58,7 +58,7 @@ public class SwerveTest extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double angle = -joystickZ.getAsDouble() * 180;
+    double angle = rotationInput.getAsDouble() * 180;
     if (angle < 0) {angle += 360;}
     SmartDashboard.putNumber("Target Angle", angle);
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {

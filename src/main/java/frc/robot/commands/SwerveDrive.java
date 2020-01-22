@@ -34,9 +34,9 @@ public class SwerveDrive extends CommandBase {
 
   private final Drivetrain drivetrain;
 
-  private DoubleSupplier joystickX;
-  private DoubleSupplier joystickY;
-  private DoubleSupplier joystickZ;
+  private DoubleSupplier rightInput;
+  private DoubleSupplier forwardInput;
+  private DoubleSupplier rotationInput;
   private DoubleSupplier gyro;
 
   /**
@@ -44,11 +44,11 @@ public class SwerveDrive extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public SwerveDrive(Drivetrain subsystem, DoubleSupplier getJoystickX, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ, DoubleSupplier getGyroAngle) {
+  public SwerveDrive(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation, DoubleSupplier getGyroAngle) {
     drivetrain = subsystem;
-    joystickX = getJoystickX;
-    joystickY = getJoystickY;
-    joystickZ = getJoystickZ;
+    rightInput = getRight;
+    forwardInput = getForward;
+    rotationInput = getRotation;
     gyro = getGyroAngle;
 
     //Declare dependency on the drivetrain subsystem
@@ -63,18 +63,18 @@ public class SwerveDrive extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double x = joystickX.getAsDouble();
-    double y = joystickY.getAsDouble();
-    double z = joystickZ.getAsDouble();
+    double x = rightInput.getAsDouble();
+    double y = forwardInput.getAsDouble();
+    double z = rotationInput.getAsDouble();
     if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(z) < 0.1) {
       return;
     }
 
     //Create a WPILib object representing the desired velocity of the robot
     ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            joystickY.getAsDouble() * 2.0,
-            joystickX.getAsDouble() * -2.0,
-            joystickZ.getAsDouble() * Math.PI * 2,
+            x * 2.0,
+            y * 2.0,
+            -z * Math.PI * 2,
             Rotation2d.fromDegrees(gyro.getAsDouble())
     );
 
