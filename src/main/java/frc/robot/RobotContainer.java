@@ -7,12 +7,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.*;
 import frc.robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.VisionLights;
 
 /**
@@ -36,6 +38,9 @@ public class RobotContainer {
     ONE_STICK,
     TWO_STICK
   }
+
+  public static NetworkTable visionTable;
+  public static NetworkTableInstance networkTableInstance;
 
   /**
    * Returns the current forward input from a joystick or other input device, based on the current control mode
@@ -87,6 +92,9 @@ public class RobotContainer {
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    networkTableInstance = NetworkTableInstance.getDefault();
+    visionTable = networkTableInstance.getTable("vision");
+
     inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
     inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
     SmartDashboard.putData("Input Mode", inputModeChooser);
@@ -135,7 +143,10 @@ public class RobotContainer {
     return null;
   }
 
-  public void updateInputMode() {
+  void periodic() {
     current_input_mode = inputModeChooser.getSelected();
+
+    SmartDashboard.putBoolean("Pi Frames Available", visionTable.getEntry("FramesAvailable").getBoolean(false));
+    SmartDashboard.putBoolean("Pi Target Found", visionTable.getEntry("TargetFound").getBoolean(false));
   }
 }
