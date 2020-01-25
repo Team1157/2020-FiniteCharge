@@ -13,18 +13,31 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class VisionLights extends SubsystemBase {
-  public Relay relay = new Relay(Constants.visonLightsRelayPort);
+  private Relay relay = new Relay(Constants.visonLightsRelayPort);
 
   /**
    * Creates a new VisionLights object.
    */
   public VisionLights() {
-    relay.set(Relay.Value.kOff);
+    setLightState(false);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putData(relay);
+  }
+
+  /**
+   * Set the state of the lights, on or off
+   *
+   * @param state The desired state, where true is on and false is off
+   */
+  public void setLightState(boolean state) {
+    if(state) {
+      relay.set(Relay.Value.kReverse);
+    } else {
+      relay.set(Relay.Value.kOff);
+    }
   }
 }

@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.VisionLights;
 
@@ -14,6 +13,6 @@ public class LightsOn extends InstantCommand {
 
     @Override
     public void initialize() {
-        visionLights.relay.set(Relay.Value.kReverse);
+        visionLights.setLightState(true);
     }
 }

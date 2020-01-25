@@ -27,7 +27,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   //Stores the location of each drive wheel, in meters. Important for swerve drive math.
-  public static final Map<MotorLocation, Translation2d> wheelCoordinates = Map.of(
+  public static final Map<MotorLocation, Translation2d> wheelCoordinates = Map.of( //TODO
           MotorLocation.FRONT_LEFT, new Translation2d(0.25, -0.25),
           MotorLocation.FRONT_RIGHT, new Translation2d(0.25, 0.25),
           MotorLocation.BACK_LEFT, new Translation2d(-0.25, -0.25),
@@ -62,7 +62,7 @@ public class Drivetrain extends SubsystemBase {
     //Configure the Talons for PID control
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       WPI_TalonSRX talon = steeringMotors.get(loc);
-      talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+      talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
       talon.config_kP(0, 10);
       talon.config_kD(0, 0);
       talon.config_kI(0, 0);
