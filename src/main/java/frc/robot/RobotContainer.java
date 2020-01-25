@@ -32,6 +32,7 @@ public class RobotContainer {
   private final VisionLights visionLights = new VisionLights();
 
   private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
+  private final SendableChooser<Boolean> visionDebugChooser = new SendableChooser<>();
 
   private INPUT_MODE current_input_mode = INPUT_MODE.ONE_STICK;
   public enum INPUT_MODE {
@@ -99,8 +100,10 @@ public class RobotContainer {
     inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
     SmartDashboard.putData("Input Mode", inputModeChooser);
 
-    SmartDashboard.putData("Gyro", gyro);
-    SmartDashboard.putData("Drivetrain", drivetrain);
+    visionDebugChooser.setDefaultOption("Off", false);
+    visionDebugChooser.addOption("On", true);
+    SmartDashboard.putData("Vision Debug", visionDebugChooser);
+
     SmartDashboard.putData("Swerve Test",
             new SwerveTest(
                     drivetrain,
@@ -145,6 +148,7 @@ public class RobotContainer {
 
   void periodic() {
     current_input_mode = inputModeChooser.getSelected();
+    visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getSelected());
 
     SmartDashboard.putBoolean("Pi Frames Available", visionTable.getEntry("FramesAvailable").getBoolean(false));
     SmartDashboard.putBoolean("Pi Target Found", visionTable.getEntry("TargetFound").getBoolean(false));
