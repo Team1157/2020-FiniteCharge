@@ -8,8 +8,12 @@
 package frc.robot;
 
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,7 +36,10 @@ public class RobotContainer {
   private final VisionLights visionLights = new VisionLights();
 
   private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
-  private final SendableChooser<Boolean> visionDebugChooser = new SendableChooser<>();
+  private final ShuffleboardTab tab = Shuffleboard.getTab("Vision Debug");
+  private NetworkTableEntry visionDebugChooser = tab.add("Vision Debug", false)
+          .withWidget(BuiltInWidgets.kBooleanBox)
+          .getEntry();
 
   private INPUT_MODE current_input_mode = INPUT_MODE.ONE_STICK;
   public enum INPUT_MODE {
