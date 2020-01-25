@@ -107,10 +107,6 @@ public class RobotContainer {
     inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
     SmartDashboard.putData("Input Mode", inputModeChooser);
 
-    visionDebugChooser.setDefaultOption("Off", false);
-    visionDebugChooser.addOption("On", true);
-    SmartDashboard.putData("Vision Debug", visionDebugChooser);
-
     SmartDashboard.putData("Swerve Test",
             new SwerveTest(
                     drivetrain,
@@ -155,7 +151,7 @@ public class RobotContainer {
 
   void periodic() {
     current_input_mode = inputModeChooser.getSelected();
-    visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getSelected());
+    visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
     SmartDashboard.putBoolean("Pi Frames Available", visionTable.getEntry("FramesAvailable").getBoolean(false));
     SmartDashboard.putBoolean("Pi Target Found", visionTable.getEntry("TargetFound").getBoolean(false));
