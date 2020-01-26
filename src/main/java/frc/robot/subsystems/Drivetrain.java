@@ -63,9 +63,9 @@ public class Drivetrain extends SubsystemBase {
     for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
       WPI_TalonSRX talon = steeringMotors.get(loc);
       talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
-      talon.config_kP(0, 10);
-      talon.config_kD(0, 0);
-      talon.config_kI(0, 0);
+      talon.config_kP(0, 4);
+      talon.config_kD(0, 10);
+      talon.config_kI(0, 0.0001);
       talon.configAllowableClosedloopError(0, 5);
       talon.configClosedloopRamp(0);
     }
