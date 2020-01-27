@@ -16,49 +16,49 @@ import frc.robot.subsystems.Drivetrain;
  * Point the wheels straight forwards and drive like a standard differential drive.
  */
 public class ArcadeDrive extends CommandBase {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Drivetrain drivetrain;
+    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    private final Drivetrain drivetrain;
 
-  private DoubleSupplier joystickY;
-  private DoubleSupplier joystickZ;
+    private DoubleSupplier joystickY;
+    private DoubleSupplier joystickZ;
 
-  /**
-   * Creates a new ArcadeDrive.
-   *
-   * @param subsystem The subsystem used by this command.
-   */
-  public ArcadeDrive(Drivetrain subsystem, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ) {
-    drivetrain = subsystem;
-    joystickY = getJoystickY;
-    joystickZ = getJoystickZ;
+    /**
+     * Creates a new ArcadeDrive.
+     *
+     * @param subsystem The subsystem used by this command.
+     */
+    public ArcadeDrive(Drivetrain subsystem, DoubleSupplier getJoystickY, DoubleSupplier getJoystickZ) {
+        drivetrain = subsystem;
+        joystickY = getJoystickY;
+        joystickZ = getJoystickZ;
 
-    //Declare dependency on the drivetrain subsystem
-    addRequirements(subsystem);
-  }
-
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    //Point each wheel straight forwards
-    for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
-      drivetrain.setDesiredWheelAngle(wheel, 0);
+        //Declare dependency on the drivetrain subsystem
+        addRequirements(subsystem);
     }
-  }
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    drivetrain.arcadeDrive(-joystickY.getAsDouble(), -joystickZ.getAsDouble());
-  }
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+        //Point each wheel straight forwards
+        for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
+            drivetrain.setDesiredWheelAngle(wheel, 0);
+        }
+    }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-  }
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        drivetrain.arcadeDrive(-joystickY.getAsDouble(), -joystickZ.getAsDouble());
+    }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }

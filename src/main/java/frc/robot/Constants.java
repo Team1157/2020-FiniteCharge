@@ -28,4 +28,6 @@ public final class Constants {
     public static int backRightSteeringMotorNumber = 7;
 
     public static int visonLightsRelayPort = 0;
+
+    public static int visionAlignButtonNumber = 0;
 }
