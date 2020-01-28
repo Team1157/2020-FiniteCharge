@@ -16,8 +16,8 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static double steeringEncoderMax = 885;
-    public static double steeringEncoderMin = 9;
+    public static int steeringEncoderMax = 885;
+    public static int steeringEncoderMin = 9;
     public static double steeringEncoderPulsesPerRevolution = steeringEncoderMax - steeringEncoderMin;
 
     public static int frontLeftDriveMotorNumber = 0;

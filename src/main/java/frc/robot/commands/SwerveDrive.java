@@ -63,8 +63,8 @@ public class SwerveDrive extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        double x = rightInput.getAsDouble();
-        double y = forwardInput.getAsDouble();
+        double y = rightInput.getAsDouble();
+        double x = forwardInput.getAsDouble();
         double z = rotationInput.getAsDouble();
         if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(z) < 0.1) {
             drivetrain.stopDriveMotors();
@@ -74,7 +74,7 @@ public class SwerveDrive extends CommandBase {
         ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 x * 2.0,
                 y * 2.0,
-                -z * Math.PI * 2,
+                -z * Math.PI / 2,
                 Rotation2d.fromDegrees(0) //Rotation2d.fromDegrees(gyro.getAsDouble())
         );
 
@@ -90,7 +90,7 @@ public class SwerveDrive extends CommandBase {
 
         //Set the drive motor speeds
         for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-            drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 2.0);
+            drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 5.0);
         }
 
         //Set the desired steering angles

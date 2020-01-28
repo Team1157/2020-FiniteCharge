@@ -39,7 +39,7 @@ public class RobotContainer {
     private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
     private final ShuffleboardTab tab = Shuffleboard.getTab("Vision Debug");
     private NetworkTableEntry visionDebugChooser = tab.add("Vision Debug", false)
-            .withWidget(BuiltInWidgets.kBooleanBox)
+            .withWidget(BuiltInWidgets.kToggleSwitch)
             .getEntry();
 
     private INPUT_MODE current_input_mode = INPUT_MODE.ONE_STICK;

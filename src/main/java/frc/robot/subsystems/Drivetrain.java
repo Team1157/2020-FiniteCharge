@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import java.util.HashMap;
 import java.util.Map;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
@@ -42,10 +43,10 @@ public class Drivetrain extends SubsystemBase {
     );
 
     private static final Map<MotorLocation, Integer> WHEEL_ENCODER_ZERO_POSITION = Map.of( //TODO
-            MotorLocation.FRONT_LEFT, 317,
-            MotorLocation.FRONT_RIGHT, -335,
-            MotorLocation.BACK_LEFT, -207,
-            MotorLocation.BACK_RIGHT, 175
+            MotorLocation.FRONT_LEFT, 308,
+            MotorLocation.FRONT_RIGHT, 415,
+            MotorLocation.BACK_LEFT, 390,
+            MotorLocation.BACK_RIGHT, 433
     );
 
     private final Map<MotorLocation, WPI_VictorSPX> driveMotors = Map.of(
@@ -61,7 +62,15 @@ public class Drivetrain extends SubsystemBase {
             MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
             MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
     );
-    private HashMap<MotorLocation, Boolean> driveMotorInverted;
+
+    private final Map<MotorLocation, Encoder> driveMotorEncoders = Map.of(
+            MotorLocation.FRONT_LEFT, new Encoder(0, 1),
+            MotorLocation.FRONT_RIGHT, new Encoder(2, 3),
+            MotorLocation.BACK_LEFT, new Encoder(4, 5),
+            MotorLocation.BACK_RIGHT, new Encoder(6, 7)
+    );
+
+    private HashMap<MotorLocation, Boolean> driveMotorInverted = new HashMap<>();
 
 
     private final double PID_P_GAIN = 0; //TODO Tune controller
@@ -104,8 +113,16 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Back Right Angle", getWheelAngle(MotorLocation.BACK_RIGHT));
-        SmartDashboard.putNumber("Back Right Encoder",  steeringMotors.get(MotorLocation.BACK_RIGHT).getSelectedSensorPosition());
+        SmartDashboard.putNumber("FL Angle", getWheelAngle(MotorLocation.FRONT_LEFT));
+        SmartDashboard.putNumber("FL Encoder",  steeringMotors.get(MotorLocation.FRONT_LEFT).getSelectedSensorPosition());
+        SmartDashboard.putNumber("FR Angle", getWheelAngle(MotorLocation.FRONT_RIGHT));
+        SmartDashboard.putNumber("FR Encoder",  steeringMotors.get(MotorLocation.FRONT_RIGHT).getSelectedSensorPosition());
+        SmartDashboard.putNumber("BL Angle", getWheelAngle(MotorLocation.BACK_LEFT));
+        SmartDashboard.putNumber("BL Encoder",  steeringMotors.get(MotorLocation.BACK_LEFT).getSelectedSensorPosition());
+        SmartDashboard.putNumber("BR Angle", getWheelAngle(MotorLocation.BACK_RIGHT));
+        SmartDashboard.putNumber("BR Encoder",  steeringMotors.get(MotorLocation.BACK_RIGHT).getSelectedSensorPosition());
+
+        SmartDashboard.putNumber("FR Drive Encoder", driveMotorEncoders.get(MotorLocation.BACK_RIGHT).get());
     }
 
     /**
@@ -183,10 +200,10 @@ public class Drivetrain extends SubsystemBase {
         WPI_TalonSRX talon = steeringMotors.get(wheel);
 
         //Get the position of the encoder, in raw units
-        int encoderTicks = talon.getSelectedSensorPosition();
+        int encoderTicks = Math.min(Math.max(talon.getSelectedSensorPosition(), Constants.steeringEncoderMin), Constants.steeringEncoderMax);
 
         //Convert the encoder position to a wheel angle
-        double angle =  ((encoderTicks - Constants.steeringEncoderMin) / Constants.steeringEncoderPulsesPerRevolution * 360) % 360;
+        double angle =  ((encoderTicks - WHEEL_ENCODER_ZERO_POSITION.get(wheel)) / Constants.steeringEncoderPulsesPerRevolution * 360) % 360;
         if (angle < 0) {angle += 360;}
         return angle;
     }
@@ -227,6 +244,7 @@ public class Drivetrain extends SubsystemBase {
         WPI_TalonSRX talon = steeringMotors.get(wheel);
         double current_angle = getWheelAngle(wheel);
         double displacement = getAngleDifference(current_angle, target_angle);
+
         /*
         if (Math.abs(displacement) < 90) {
             driveMotorInverted.put(wheel, false);
@@ -235,6 +253,7 @@ public class Drivetrain extends SubsystemBase {
             target_angle = (target_angle + 180) % 360;
             displacement = getAngleDifference(current_angle, target_angle);
         }
+
          */
 
         int current_encoder_position = talon.getSelectedSensorPosition();
