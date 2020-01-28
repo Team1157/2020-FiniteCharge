@@ -10,7 +10,6 @@ package frc.robot.commands;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.VisionLights;
@@ -22,11 +21,6 @@ import java.util.function.DoubleSupplier;
  */
 public class VisionAlign extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final double PID_P_GAIN = 0; //TODO Tune controller
-    private final double PID_D_GAIN = 0;
-    private final double PID_I_GAIN = 0;
-    private final double PID_TOLERANCE = 1;
-    private final PIDController pidController;
 
     private final Drivetrain drivetrain;
     private final VisionLights visionSubsystem;
@@ -59,21 +53,13 @@ public class VisionAlign extends CommandBase {
 
         getAngleToTarget = visionTable.getEntry("AngleToTarget");
         getTargetFound = visionTable.getEntry("TargetFound");
-
-        pidController = new PIDController(
-                PID_P_GAIN,
-                PID_I_GAIN,
-                PID_D_GAIN
-        );
-        pidController.setTolerance(PID_TOLERANCE);
-        pidController.enableContinuousInput(0, 360);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
         visionSubsystem.setLightState(true);
-        drivetrain.angleWheelsForRotation();
+        drivetrain.initRotationPID();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -86,20 +72,13 @@ public class VisionAlign extends CommandBase {
                 if (targetAngle < 0) {
                     targetAngle += 360;
                 }
-                pidController.setSetpoint(targetAngle);
+                drivetrain.setRotationPIDSetpoint(targetAngle);
             }
         } else {
             lastAngleToTarget = 1000;
         }
 
-        double rotationSpeed = pidController.calculate(gyro.getAsDouble());
-        for (Drivetrain.MotorLocation motorLocation: Drivetrain.MotorLocation.values()) {
-            if (drivetrain.areAllWheelsWithinTolerance()) {
-                drivetrain.setDriveMotorSpeed(motorLocation, rotationSpeed);
-            } else {
-                drivetrain.setDriveMotorSpeed(motorLocation, 0);
-            }
-        }
+        drivetrain.updateRotationPID(gyro.getAsDouble());
     }
 
     // Called once the command ends or is interrupted.

@@ -138,12 +138,14 @@ public class RobotContainer {
      * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        /*
         JoystickButton visionAlignButton = new JoystickButton(primaryStick, Constants.visionAlignButtonNumber);
         visionAlignButton.whileHeld(new VisionAlign(
                 drivetrain,
                 visionLights,
                 gyro::getAngle
         ));
+         */
     }
 
 

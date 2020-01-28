@@ -7,13 +7,15 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashMap;
 import java.util.Map;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX; //Note: add build/libs/FRC 2020 to your classpath.
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -22,7 +24,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
-    private final double STEERING_ANGLE_TOLERANCE = 5; //In degrees
+    private final double STEERING_ANGLE_TOLERANCE = 3; //In degrees
 
     public enum MotorLocation {
         FRONT_LEFT,
@@ -39,6 +41,13 @@ public class Drivetrain extends SubsystemBase {
             MotorLocation.BACK_RIGHT, new Translation2d(-0.25, 0.25)
     );
 
+    private static final Map<MotorLocation, Integer> WHEEL_ENCODER_ZERO_POSITION = Map.of( //TODO
+            MotorLocation.FRONT_LEFT, 317,
+            MotorLocation.FRONT_RIGHT, -335,
+            MotorLocation.BACK_LEFT, -207,
+            MotorLocation.BACK_RIGHT, 175
+    );
+
     private final Map<MotorLocation, WPI_VictorSPX> driveMotors = Map.of(
             MotorLocation.FRONT_LEFT, new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber),
             MotorLocation.FRONT_RIGHT, new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
@@ -52,13 +61,14 @@ public class Drivetrain extends SubsystemBase {
             MotorLocation.BACK_LEFT, new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
             MotorLocation.BACK_RIGHT, new WPI_TalonSRX(Constants.backRightSteeringMotorNumber)
     );
+    private HashMap<MotorLocation, Boolean> driveMotorInverted;
 
-    private Map<MotorLocation, Boolean> driveMotorInverted = Map.of(
-            MotorLocation.FRONT_LEFT, false,
-            MotorLocation.FRONT_RIGHT, false,
-            MotorLocation.BACK_LEFT, false,
-            MotorLocation.BACK_RIGHT, false
-    );
+
+    private final double PID_P_GAIN = 0; //TODO Tune controller
+    private final double PID_D_GAIN = 0;
+    private final double PID_I_GAIN = 0;
+    private final double PID_TOLERANCE = 1; //In degrees
+    private final PIDController rotationPIDController;
 
     /**
      * Creates a new Drivetrain.
@@ -66,27 +76,40 @@ public class Drivetrain extends SubsystemBase {
     public Drivetrain() {
         //Configure the Talons for PID control
         for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+            driveMotorInverted.put(loc, false);
+
             WPI_TalonSRX talon = steeringMotors.get(loc);
+            talon.configFactoryDefault();
             talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
             talon.config_kP(0, 4);
-            talon.config_kD(0, 10);
-            talon.config_kI(0, 0.0001);
-            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.pulsesPerRevolution));
-            talon.configClosedloopRamp(0);
+            talon.config_kD(0, 8);
+            talon.config_kI(0, 0);
+            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution));
+            talon.configFeedbackNotContinuous(true, 0);
         }
 
         steeringMotors.get(MotorLocation.FRONT_LEFT).setInverted(false);
-        steeringMotors.get(MotorLocation.FRONT_RIGHT).setInverted(true);
+        steeringMotors.get(MotorLocation.FRONT_RIGHT).setInverted(false);
         steeringMotors.get(MotorLocation.BACK_LEFT).setInverted(false);
-        steeringMotors.get(MotorLocation.BACK_RIGHT).setInverted(true);
+        steeringMotors.get(MotorLocation.BACK_RIGHT).setInverted(false);
+
+        rotationPIDController = new PIDController(
+            PID_P_GAIN,
+            PID_I_GAIN,
+            PID_D_GAIN
+        );
+        rotationPIDController.setTolerance(PID_TOLERANCE);
+        rotationPIDController.enableContinuousInput(0, 360);
     }
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Back Right Angle", getWheelAngle(MotorLocation.BACK_RIGHT));
+        SmartDashboard.putNumber("Back Right Encoder",  steeringMotors.get(MotorLocation.BACK_RIGHT).getSelectedSensorPosition());
     }
 
     /**
-     * Sets the speed of an individual drive motor
+     * Set the speed of an individual drive motor
      * @param motor the motor to control
      * @param speed the desired motor speed, from -1 to 1
      */
@@ -98,7 +121,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Sets the speeds of the drive motors such that the robot moves as specified by the forward and rotation paramater
+     * Set the speeds of the drive motors such that the robot moves as specified by the forward and rotation paramater
      * Assumes that the wheels are pointed forwards
      * @param forward The desired forwards speed, from -1 to 1
      * @param rotation The desired angular velocity, from -1 to 1
@@ -163,7 +186,7 @@ public class Drivetrain extends SubsystemBase {
         int encoderTicks = talon.getSelectedSensorPosition();
 
         //Convert the encoder position to a wheel angle
-        double angle =  (encoderTicks / Constants.pulsesPerRevolution * 360) % 360;
+        double angle =  ((encoderTicks - Constants.steeringEncoderMin) / Constants.steeringEncoderPulsesPerRevolution * 360) % 360;
         if (angle < 0) {angle += 360;}
         return angle;
     }
@@ -175,7 +198,7 @@ public class Drivetrain extends SubsystemBase {
      * @return Whether the wheel is within tolerance
      */
     private boolean isWheelWithinTolerance(MotorLocation wheel) {
-        return steeringMotors.get(wheel).getClosedLoopError() < (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.pulsesPerRevolution);
+        return steeringMotors.get(wheel).getClosedLoopError() < (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution);
     }
 
     /**
@@ -203,9 +226,8 @@ public class Drivetrain extends SubsystemBase {
 
         WPI_TalonSRX talon = steeringMotors.get(wheel);
         double current_angle = getWheelAngle(wheel);
-        int current_encoder_position = talon.getSelectedSensorPosition();
-
         double displacement = getAngleDifference(current_angle, target_angle);
+        /*
         if (Math.abs(displacement) < 90) {
             driveMotorInverted.put(wheel, false);
         } else {
@@ -213,15 +235,17 @@ public class Drivetrain extends SubsystemBase {
             target_angle = (target_angle + 180) % 360;
             displacement = getAngleDifference(current_angle, target_angle);
         }
+         */
 
-        double desiredEncoderPosition = current_encoder_position + displacement * Constants.pulsesPerRevolution / 360.0;
+        int current_encoder_position = talon.getSelectedSensorPosition();
+        double desiredEncoderPosition = current_encoder_position + displacement * Constants.steeringEncoderPulsesPerRevolution / 360.0;
         talon.set(ControlMode.Position, desiredEncoderPosition);
     }
 
     /**
      * Angle the wheels perpendicular to the line connecting them to the center of the chassis, ideal for rotation in place
      */
-    public void angleWheelsForRotation() {
+    private void angleWheelsForRotation() {
         SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
                 wheelCoordinates.get(MotorLocation.FRONT_LEFT),
                 wheelCoordinates.get(MotorLocation.FRONT_RIGHT),
@@ -243,5 +267,50 @@ public class Drivetrain extends SubsystemBase {
             double rawAngle = moduleStates.get(wheel).angle.getDegrees();
             setDesiredWheelAngle(wheel, -rawAngle);
         }
+    }
+
+    /**
+     * Initialize the pid controller to rotate towards a desired heading. You must call updateRotationPID() to update it.
+     */
+    public void initRotationPID() {
+        rotationPIDController.reset();
+        angleWheelsForRotation();
+    }
+
+    /**
+     * Once the pid has been initialized, update the drive wheel speeds based on the current gyro angle
+     *
+     * @param currentAngle The current rotation of the robot, as measured by the gyro
+     */
+    public void updateRotationPID(double currentAngle) {
+        currentAngle = currentAngle % 360;
+        if (currentAngle < 0) { currentAngle += 360; }
+
+        double rotationSpeed = rotationPIDController.calculate(currentAngle);
+        for (MotorLocation motorLocation: MotorLocation.values()) {
+            if (areAllWheelsWithinTolerance()) {
+                setDriveMotorSpeed(motorLocation, rotationSpeed);
+            } else {
+                setDriveMotorSpeed(motorLocation, 0);
+            }
+        }
+    }
+
+    /**
+     * Change the target angle of the rotation PID controller
+     *
+     * @param setpoint The new setpoint
+     */
+    public void setRotationPIDSetpoint(double setpoint) {
+        rotationPIDController.setSetpoint(setpoint);
+    }
+
+    /**
+     * Check whether the PID controller is within the tolerance PID_TOLERANCE
+     *
+     * @return whether the controller is within tolerance
+     */
+    public boolean isRotationPIDWithinTolerance() {
+        return rotationPIDController.atSetpoint();
     }
 }

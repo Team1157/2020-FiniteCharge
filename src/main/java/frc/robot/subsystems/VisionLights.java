@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class VisionLights extends SubsystemBase {
-    private Relay relay = new Relay(Constants.visonLightsRelayPort);
+    private Relay relay = new Relay(Constants.visionLightsRelayPort);
 
     /**
      * Creates a new VisionLights object.

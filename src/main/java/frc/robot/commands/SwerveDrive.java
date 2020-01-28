@@ -67,7 +67,7 @@ public class SwerveDrive extends CommandBase {
         double y = forwardInput.getAsDouble();
         double z = rotationInput.getAsDouble();
         if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1 && Math.abs(z) < 0.1) {
-            return;
+            drivetrain.stopDriveMotors();
         }
 
         //Create a WPILib object representing the desired velocity of the robot
@@ -75,7 +75,7 @@ public class SwerveDrive extends CommandBase {
                 x * 2.0,
                 y * 2.0,
                 -z * Math.PI * 2,
-                Rotation2d.fromDegrees(gyro.getAsDouble())
+                Rotation2d.fromDegrees(0) //Rotation2d.fromDegrees(gyro.getAsDouble())
         );
 
         //Calculates the desired state for each swerve module
@@ -98,6 +98,7 @@ public class SwerveDrive extends CommandBase {
             double rawAngle = moduleStates.get(wheel).angle.getDegrees();
             drivetrain.setDesiredWheelAngle(wheel, -rawAngle);
         }
+
     }
 
     // Called once the command ends or is interrupted.
