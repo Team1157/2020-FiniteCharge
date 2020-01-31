@@ -60,7 +60,7 @@ public class RobotContainer {
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                return -primaryStick.getY();
+                return -primaryStick.getY() * (-primaryStick.getRawAxis(3) + 1) / 2;
             default:
                 return 0;
         }
@@ -75,23 +75,23 @@ public class RobotContainer {
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                return primaryStick.getX();
+                return primaryStick.getX() * (-primaryStick.getRawAxis(3) + 1) / 2;
             default:
                 return 0;
         }
     }
 
     /**
-     * Returns the current right input from a joystick or other input device, based on the current control mode
+     * Returns the current rotation input from a joystick or other input device, based on the current control mode
      *
      * @return The input, from -1 to 1, with positive being counterclockwise
      */
     public double getRotationInput() {
         switch (current_input_mode) {
             case ONE_STICK:
-                return -primaryStick.getZ();
+                return -primaryStick.getZ() * (-primaryStick.getRawAxis(3) + 1) / 2;
             case TWO_STICK:
-                return -secondaryStick.getX();
+                return -secondaryStick.getX() * (-secondaryStick.getRawAxis(2) + 1) / 2;
             default:
                 return 0;
         }
@@ -107,6 +107,7 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
+        SmartDashboard.putData("Gyro", gyro);
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(
@@ -116,6 +117,8 @@ public class RobotContainer {
                         this::getRotationInput,
                         gyro::getAngle
                 ));
+
+        SmartDashboard.putData("Reset Gyro", new ResetGyro(gyro));
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs
@@ -138,14 +141,25 @@ public class RobotContainer {
      * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        JoystickButton visionAlignButton;
+        if (current_input_mode == INPUT_MODE.ONE_STICK) {
+            visionAlignButton = new JoystickButton(primaryStick, Constants.visionAlignButtonNumber);
+        } else {
+            visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
+        }
         /*
-        JoystickButton visionAlignButton = new JoystickButton(primaryStick, Constants.visionAlignButtonNumber);
         visionAlignButton.whileHeld(new VisionAlign(
                 drivetrain,
                 visionLights,
                 gyro::getAngle
         ));
+
          */
+        visionAlignButton.whileHeld(new RotateToAngle(
+                drivetrain,
+                0,
+                gyro::getAngle
+        ));
     }
 
 
@@ -159,7 +173,12 @@ public class RobotContainer {
     }
 
     void periodic() {
+        INPUT_MODE last_mode = current_input_mode;
         current_input_mode = inputModeChooser.getSelected();
+        if (last_mode != current_input_mode) {
+            System.out.println("Changing Input Mode");
+            configureButtonBindings();
+        }
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
         SmartDashboard.putBoolean("Pi Frames Available", visionTable.getEntry("FramesAvailable").getBoolean(false));

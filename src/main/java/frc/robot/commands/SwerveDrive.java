@@ -74,8 +74,8 @@ public class SwerveDrive extends CommandBase {
         ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 x * 2.0,
                 y * 2.0,
-                -z * Math.PI / 2,
-                Rotation2d.fromDegrees(0) //Rotation2d.fromDegrees(gyro.getAsDouble())
+                -z * Math.PI * 2,
+                Rotation2d.fromDegrees(gyro.getAsDouble())
         );
 
         //Calculates the desired state for each swerve module
@@ -90,7 +90,7 @@ public class SwerveDrive extends CommandBase {
 
         //Set the drive motor speeds
         for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-            drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 5.0);
+            drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 2.0);
         }
 
         //Set the desired steering angles

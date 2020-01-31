@@ -42,10 +42,10 @@ public class Drivetrain extends SubsystemBase {
             MotorLocation.BACK_RIGHT, new Translation2d(-0.25, 0.25)
     );
 
-    private static final Map<MotorLocation, Integer> WHEEL_ENCODER_ZERO_POSITION = Map.of( //TODO
+    private static final Map<MotorLocation, Integer> WHEEL_ENCODER_ZERO_POSITION = Map.of(
             MotorLocation.FRONT_LEFT, 308,
             MotorLocation.FRONT_RIGHT, 415,
-            MotorLocation.BACK_LEFT, 390,
+            MotorLocation.BACK_LEFT, 566,
             MotorLocation.BACK_RIGHT, 433
     );
 
@@ -73,10 +73,10 @@ public class Drivetrain extends SubsystemBase {
     private HashMap<MotorLocation, Boolean> driveMotorInverted = new HashMap<>();
 
 
-    private final double PID_P_GAIN = 0; //TODO Tune controller
-    private final double PID_D_GAIN = 0;
+    private final double PID_P_GAIN = -0.03;
+    private final double PID_D_GAIN = -0.002;
     private final double PID_I_GAIN = 0;
-    private final double PID_TOLERANCE = 1; //In degrees
+    private final double PID_TOLERANCE = 3; //In degrees
     private final PIDController rotationPIDController;
 
     /**
@@ -84,7 +84,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public Drivetrain() {
         //Configure the Talons for PID control
-        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+        for (MotorLocation loc : MotorLocation.values()) {
             driveMotorInverted.put(loc, false);
 
             WPI_TalonSRX talon = steeringMotors.get(loc);
@@ -95,6 +95,9 @@ public class Drivetrain extends SubsystemBase {
             talon.config_kI(0, 0);
             talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution));
             talon.configFeedbackNotContinuous(true, 0);
+
+            Encoder encoder = driveMotorEncoders.get(loc);
+            encoder.setReverseDirection(true);
         }
 
         steeringMotors.get(MotorLocation.FRONT_LEFT).setInverted(false);
@@ -109,6 +112,8 @@ public class Drivetrain extends SubsystemBase {
         );
         rotationPIDController.setTolerance(PID_TOLERANCE);
         rotationPIDController.enableContinuousInput(0, 360);
+
+        SmartDashboard.putData(rotationPIDController);
     }
 
     @Override
@@ -122,7 +127,7 @@ public class Drivetrain extends SubsystemBase {
         SmartDashboard.putNumber("BR Angle", getWheelAngle(MotorLocation.BACK_RIGHT));
         SmartDashboard.putNumber("BR Encoder",  steeringMotors.get(MotorLocation.BACK_RIGHT).getSelectedSensorPosition());
 
-        SmartDashboard.putNumber("FR Drive Encoder", driveMotorEncoders.get(MotorLocation.BACK_RIGHT).get());
+        SmartDashboard.putBoolean("Wheels Within Tolerance", areAllWheelsWithinTolerance());
     }
 
     /**
@@ -215,7 +220,7 @@ public class Drivetrain extends SubsystemBase {
      * @return Whether the wheel is within tolerance
      */
     private boolean isWheelWithinTolerance(MotorLocation wheel) {
-        return steeringMotors.get(wheel).getClosedLoopError() < (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution);
+        return steeringMotors.get(wheel).getClosedLoopError() < (int) (20 / 360.0 * Constants.steeringEncoderPulsesPerRevolution);
     }
 
     /**
@@ -245,7 +250,7 @@ public class Drivetrain extends SubsystemBase {
         double current_angle = getWheelAngle(wheel);
         double displacement = getAngleDifference(current_angle, target_angle);
 
-        /*
+
         if (Math.abs(displacement) < 90) {
             driveMotorInverted.put(wheel, false);
         } else {
@@ -253,8 +258,6 @@ public class Drivetrain extends SubsystemBase {
             target_angle = (target_angle + 180) % 360;
             displacement = getAngleDifference(current_angle, target_angle);
         }
-
-         */
 
         int current_encoder_position = talon.getSelectedSensorPosition();
         double desiredEncoderPosition = current_encoder_position + displacement * Constants.steeringEncoderPulsesPerRevolution / 360.0;
@@ -305,7 +308,8 @@ public class Drivetrain extends SubsystemBase {
         currentAngle = currentAngle % 360;
         if (currentAngle < 0) { currentAngle += 360; }
 
-        double rotationSpeed = rotationPIDController.calculate(currentAngle);
+        double rotationSpeedRaw = rotationPIDController.calculate(currentAngle);
+        double rotationSpeed = Math.copySign(Math.min(0.5, Math.abs(rotationSpeedRaw)), rotationSpeedRaw);
         for (MotorLocation motorLocation: MotorLocation.values()) {
             if (areAllWheelsWithinTolerance()) {
                 setDriveMotorSpeed(motorLocation, rotationSpeed);
