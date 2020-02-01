@@ -26,10 +26,10 @@ public class SwerveDrive extends CommandBase {
 
     //Object handles the high level math for calculating wheel speeds and angles
     private final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
-            Drivetrain.wheelCoordinates.get(Drivetrain.MotorLocation.FRONT_LEFT),
-            Drivetrain.wheelCoordinates.get(Drivetrain.MotorLocation.FRONT_RIGHT),
-            Drivetrain.wheelCoordinates.get(Drivetrain.MotorLocation.BACK_LEFT),
-            Drivetrain.wheelCoordinates.get(Drivetrain.MotorLocation.BACK_RIGHT)
+            Drivetrain.MotorLocation.FRONT_LEFT.coordinates,
+            Drivetrain.MotorLocation.FRONT_RIGHT.coordinates,
+            Drivetrain.MotorLocation.BACK_LEFT.coordinates,
+            Drivetrain.MotorLocation.BACK_RIGHT.coordinates
     );
 
     private final Drivetrain drivetrain;

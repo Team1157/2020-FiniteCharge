@@ -1,2 +1,7 @@
+# IntelliJ
 .idea/
+*.iml
+# Other
 .vscode/
+.gradle/
+build/
