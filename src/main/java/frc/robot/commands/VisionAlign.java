@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.VisionLights;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -28,11 +31,13 @@ public class VisionAlign extends CommandBase {
     private final NetworkTableEntry getAngleToTarget;
     private final NetworkTableEntry getTargetFound;
 
-    private double targetAngle;
+//    private double targetAngle;
 
     private NetworkTable visionTable;
 
     private double lastAngleToTarget = 1000; //Make sure to start on to always be different from the first reading
+    private double lastAngle = 0;
+    private List<Double> angles = new ArrayList<>();
 
     /**
      * Consturctor for the VisionAlign command
@@ -66,20 +71,37 @@ public class VisionAlign extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (getTargetFound.getBoolean(false)) {
-            double angleToTarget = getAngleToTarget.getDouble(1000);
-            if (angleToTarget != lastAngleToTarget) {
-                targetAngle = (gyroAngle.getAsDouble() + angleToTarget) % 360;
-                if (targetAngle < 0) {
-                    targetAngle += 360;
-                }
-                drivetrain.setRotationPIDSetpoint(targetAngle);
+        double angle = getAngleToTarget.getDouble(0); // Get angle
+        if (angle != lastAngle && getTargetFound.getBoolean(false)) { // If angle has changed and target found, then
+            angles.add(angle); // Add the new angle to the list
+            lastAngle = angle;
+        }
+        if (angles.size() >= 10) { // Every ~1/3 second
+            Collections.sort(angles); // Sort list to find median
+            double angleToTarget = angles.get(angles.size() / 2); // Approximate median angle
+            double targetAngle = (gyroAngle.getAsDouble() + angleToTarget) % 360; // Convert relative to gyro angle
+            if (targetAngle < 0) {
+                targetAngle += 360;
             }
-        } else {
-            lastAngleToTarget = 1000;
+            drivetrain.setRotationPIDSetpoint(targetAngle); //
+            angles.clear();
         }
 
-        drivetrain.updateRotationPID(gyroAngle.getAsDouble());
+        drivetrain.updateRotationPID(gyroAngle.getAsDouble()); // Supply current gyro to PID to update ouptuts
+
+//        if (getTargetFound.getBoolean(false)) {
+//            double angleToTarget = getAngleToTarget.getDouble(1000);
+//            if (angleToTarget != lastAngleToTarget) {
+//                targetAngle = (gyroAngle.getAsDouble() + angleToTarget) % 360;
+//                if (targetAngle < 0) {
+//                    targetAngle += 360;
+//                }
+//                drivetrain.setRotationPIDSetpoint(targetAngle);
+//            }
+//        } else {
+//            lastAngleToTarget = 1000;
+//        }
+
     }
 
     // Called once the command ends or is interrupted.
