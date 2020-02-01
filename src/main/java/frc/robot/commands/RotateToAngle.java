@@ -39,6 +39,7 @@ public class RotateToAngle extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        drivetrain.configurePIDLoop(-0.05, 0, -0.002);
         drivetrain.initRotationPID();
         drivetrain.setRotationPIDSetpoint(targetAngle);
     }

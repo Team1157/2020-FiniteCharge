@@ -32,4 +32,7 @@ public final class Constants {
     public static int visionLightsRelayPort = 0;
 
     public static int visionAlignButtonNumber = 1;
+
+    public static double[] joystickSensitivityRange = {0.25, 1};
+    public static double joystickDeadZone = 0.05;
 }

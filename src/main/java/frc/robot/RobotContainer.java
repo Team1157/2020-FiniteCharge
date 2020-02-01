@@ -57,13 +57,20 @@ public class RobotContainer {
      * @return The input, from -1 to 1
      */
     public double getForwardInput() {
+        double raw_input;
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                return -primaryStick.getY() * (-primaryStick.getRawAxis(3) + 1) / 2;
+                raw_input =  -primaryStick.getY();
+                break;
             default:
-                return 0;
+                raw_input = 0;
         }
+        if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
+        double sensitivity = -primaryStick.getRawAxis(3);
+        double sensitivityMin = Constants.joystickSensitivityRange[0];
+        double sensitivityMax = Constants.joystickSensitivityRange[1];
+        return raw_input * (sensitivityMin + ((sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2));
     }
 
     /**
@@ -72,13 +79,20 @@ public class RobotContainer {
      * @return The input, from -1 to 1
      */
     public double getRightInput() {
+        double raw_input;
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                return primaryStick.getX() * (-primaryStick.getRawAxis(3) + 1) / 2;
+                raw_input = primaryStick.getX();
+                break;
             default:
-                return 0;
+                raw_input = 0;
         }
+        if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
+        double sensitivity = -primaryStick.getRawAxis(3);
+        double sensitivityMin = Constants.joystickSensitivityRange[0];
+        double sensitivityMax = Constants.joystickSensitivityRange[1];
+        return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
     }
 
     /**
@@ -87,14 +101,25 @@ public class RobotContainer {
      * @return The input, from -1 to 1, with positive being counterclockwise
      */
     public double getRotationInput() {
+        double raw_input;
+        double sensitivity;
         switch (current_input_mode) {
             case ONE_STICK:
-                return -primaryStick.getZ() * (-primaryStick.getRawAxis(3) + 1) / 2;
+                raw_input = -primaryStick.getZ();
+                sensitivity = -primaryStick.getRawAxis(3);
+                break;
             case TWO_STICK:
-                return -secondaryStick.getX() * (-secondaryStick.getRawAxis(2) + 1) / 2;
+                raw_input = -secondaryStick.getX();
+                sensitivity = -secondaryStick.getRawAxis(2);
+                break;
             default:
-                return 0;
+                raw_input = 0;
+                sensitivity = 0;
         }
+        if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
+        double sensitivityMin = Constants.joystickSensitivityRange[0];
+        double sensitivityMax = Constants.joystickSensitivityRange[1];
+        return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
     }
 
     /**
@@ -147,17 +172,9 @@ public class RobotContainer {
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
         }
-        /*
         visionAlignButton.whileHeld(new VisionAlign(
                 drivetrain,
                 visionLights,
-                gyro::getAngle
-        ));
-
-         */
-        visionAlignButton.whileHeld(new RotateToAngle(
-                drivetrain,
-                0,
                 gyro::getAngle
         ));
     }
@@ -181,7 +198,7 @@ public class RobotContainer {
         }
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
-        SmartDashboard.putBoolean("Pi Frames Available", visionTable.getEntry("FramesAvailable").getBoolean(false));
-        SmartDashboard.putBoolean("Pi Target Found", visionTable.getEntry("TargetFound").getBoolean(false));
+        SmartDashboard.putBoolean("Pi Online", visionTable.getEntry("FramesAvailable").getBoolean(false));
+        SmartDashboard.putNumber("Forward Input", getForwardInput());
     }
 }

@@ -59,6 +59,7 @@ public class VisionAlign extends CommandBase {
     @Override
     public void initialize() {
         visionSubsystem.setLightState(true);
+        drivetrain.configurePIDLoop(-0.02, 0.001, 0);
         drivetrain.initRotationPID();
     }
 
