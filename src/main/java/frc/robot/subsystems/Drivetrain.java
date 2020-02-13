@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -78,6 +79,8 @@ public class Drivetrain extends SubsystemBase {
 
     private final double PID_TOLERANCE = 3; //In degrees
     private final PIDController rotationPIDController;
+    private final SwerveDriveKinematics kinematics;
+    private final SwerveDriveOdometry odometry;
 
     /**
      * Creates a new Drivetrain.
@@ -97,6 +100,17 @@ public class Drivetrain extends SubsystemBase {
             Encoder encoder = loc.driveEncoder;
             encoder.setReverseDirection(true);
         }
+        // Create kinematics and odometry
+        kinematics = new SwerveDriveKinematics(
+                MotorLocation.FRONT_LEFT.coordinates,
+                MotorLocation.FRONT_RIGHT.coordinates,
+                MotorLocation.BACK_LEFT.coordinates,
+                MotorLocation.BACK_RIGHT.coordinates
+        );
+        odometry = new SwerveDriveOdometry(
+                kinematics,
+
+        )
 
         MotorLocation.FRONT_LEFT.steeringMotor.setInverted(false);
         MotorLocation.FRONT_RIGHT.steeringMotor.setInverted(false);
@@ -260,12 +274,7 @@ public class Drivetrain extends SubsystemBase {
      * Angle the wheels perpendicular to the line connecting them to the center of the chassis, ideal for rotation in place
      */
     private void angleWheelsForRotation() {
-        SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
-                MotorLocation.FRONT_LEFT.coordinates,
-                MotorLocation.FRONT_RIGHT.coordinates,
-                MotorLocation.BACK_LEFT.coordinates,
-                MotorLocation.BACK_RIGHT.coordinates
-        );
+
 
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0, 0, -1);
         SwerveModuleState[] moduleStatesList = swerveDriveKinematics.toSwerveModuleStates(chassisSpeeds);
@@ -340,5 +349,9 @@ public class Drivetrain extends SubsystemBase {
      */
     public boolean isRotationPIDWithinTolerance() {
         return rotationPIDController.atSetpoint();
+    }
+
+    public int getEncoderPosiiton(MotorLocation pos) {
+        return pos.driveEncoder.getRaw();
     }
 }
