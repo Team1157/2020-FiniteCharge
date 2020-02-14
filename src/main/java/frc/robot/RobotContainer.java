@@ -31,7 +31,6 @@ import frc.robot.subsystems.VisionLights;
 public class RobotContainer {
     private final Joystick primaryStick = new Joystick(0);
     private final Joystick secondaryStick = new Joystick(1);
-    private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
     private final Drivetrain drivetrain = new Drivetrain();
     private final VisionLights visionLights = new VisionLights();
@@ -132,18 +131,17 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
-        SmartDashboard.putData("Gyro", gyro);
+        SmartDashboard.putData("Gyro", drivetrain.gyro);
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(
                         drivetrain,
                         this::getRightInput,
                         this::getForwardInput,
-                        this::getRotationInput,
-                        gyro::getAngle
+                        this::getRotationInput
                 ));
 
-        SmartDashboard.putData("Reset Gyro", new ResetGyro(gyro));
+        SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs
@@ -151,8 +149,7 @@ public class RobotContainer {
                         drivetrain,
                         this::getRightInput,
                         this::getForwardInput,
-                        this::getRotationInput,
-                        gyro::getAngle
+                        this::getRotationInput
                 ));
         // Configure the button bindings
         configureButtonBindings();
@@ -172,11 +169,7 @@ public class RobotContainer {
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
         }
-        visionAlignButton.whileHeld(new VisionAlign(
-                drivetrain,
-                visionLights,
-                gyro::getAngle
-        ));
+        visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights));
     }
 
 

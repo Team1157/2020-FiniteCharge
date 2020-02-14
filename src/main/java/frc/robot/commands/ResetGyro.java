@@ -2,16 +2,17 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.Drivetrain;
 
 public class ResetGyro extends InstantCommand {
-    private ADXRS450_Gyro gyro;
+    private Drivetrain drivetrain;
 
-    public ResetGyro(ADXRS450_Gyro gyro_param) {
-        gyro = gyro_param;
+    public ResetGyro(Drivetrain drivetrain) {
+        this.drivetrain = drivetrain;
     }
 
     @Override
     public void initialize() {
-        gyro.reset();
+        drivetrain.resetGyro();
     }
 }

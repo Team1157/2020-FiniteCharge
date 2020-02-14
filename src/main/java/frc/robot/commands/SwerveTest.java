@@ -32,19 +32,17 @@ public class SwerveTest extends CommandBase {
     private DoubleSupplier rightInput;
     private DoubleSupplier forwardInput;
     private DoubleSupplier rotationInput;
-    private DoubleSupplier gyro;
 
     /**
      * Creates a new SwerveTest.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public SwerveTest(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation, DoubleSupplier getGyroAngle) {
+    public SwerveTest(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
         drivetrain = subsystem;
         rightInput = getRight;
         forwardInput = getForward;
         rotationInput = getRotation;
-        gyro = getGyroAngle;
 
         //Declare dependency on the drivetrain subsystem
         addRequirements(subsystem);

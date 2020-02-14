@@ -8,9 +8,14 @@
 package frc.robot.subsystems;
 
 import java.util.Map;
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
@@ -32,6 +37,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public enum MotorLocation {
         FRONT_LEFT(
+                0,
                 new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates
                 308, // zeroPos: Zero
                 new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to SC for drive
@@ -39,6 +45,7 @@ public class Drivetrain extends SubsystemBase {
                 new Encoder(0, 1) // driveEncoder: reference to encoder for drive CIM
         ),
         FRONT_RIGHT(
+                1,
                 new Translation2d(0.269875, 0.320675),
                 415,
                 new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
@@ -46,6 +53,7 @@ public class Drivetrain extends SubsystemBase {
                 new Encoder(2, 3)
         ),
         BACK_LEFT(
+                2,
                 new Translation2d(-0.269875, -0.320675),
                 620,
                 new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
@@ -53,6 +61,7 @@ public class Drivetrain extends SubsystemBase {
                 new Encoder(4, 5)
         ),
         BACK_RIGHT(
+                3,
                 new Translation2d(-0.269875, 0.320675),
                 433,
                 new WPI_VictorSPX(Constants.backRightDriveMotorNumber),
@@ -60,6 +69,7 @@ public class Drivetrain extends SubsystemBase {
                 new Encoder(6, 7)
         );
 
+        public final int index;
         public final Translation2d coordinates;
         public final int zeroPos;
         public final WPI_VictorSPX driveMotor;
@@ -67,7 +77,8 @@ public class Drivetrain extends SubsystemBase {
         public final Encoder driveEncoder;
         public boolean inverted;
 
-        MotorLocation(Translation2d coords, int zero, WPI_VictorSPX driveMotor, WPI_TalonSRX steeringMotor, Encoder driveEncoder) {
+        MotorLocation(int index, Translation2d coords, int zero, WPI_VictorSPX driveMotor, WPI_TalonSRX steeringMotor, Encoder driveEncoder) {
+            this.index = index;
             this.coordinates = coords;
             this.zeroPos = zero;
             this.driveMotor = driveMotor;
@@ -81,6 +92,9 @@ public class Drivetrain extends SubsystemBase {
     private final PIDController rotationPIDController;
     private final SwerveDriveKinematics kinematics;
     private final SwerveDriveOdometry odometry;
+    private Pose2d currentPose;
+
+    private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
     /**
      * Creates a new Drivetrain.
@@ -109,8 +123,9 @@ public class Drivetrain extends SubsystemBase {
         );
         odometry = new SwerveDriveOdometry(
                 kinematics,
-
-        )
+                getGyroRotation(),
+                new Pose2d() // Default position 0,0 - set real position on Shuffleboard?
+        );
 
         MotorLocation.FRONT_LEFT.steeringMotor.setInverted(false);
         MotorLocation.FRONT_RIGHT.steeringMotor.setInverted(false);
@@ -274,20 +289,11 @@ public class Drivetrain extends SubsystemBase {
      * Angle the wheels perpendicular to the line connecting them to the center of the chassis, ideal for rotation in place
      */
     private void angleWheelsForRotation() {
-
-
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0, 0, -1);
-        SwerveModuleState[] moduleStatesList = swerveDriveKinematics.toSwerveModuleStates(chassisSpeeds);
-
-        Map<Drivetrain.MotorLocation, SwerveModuleState> moduleStates = Map.of(
-                Drivetrain.MotorLocation.FRONT_LEFT, moduleStatesList[0],
-                Drivetrain.MotorLocation.FRONT_RIGHT, moduleStatesList[1],
-                Drivetrain.MotorLocation.BACK_LEFT, moduleStatesList[2],
-                Drivetrain.MotorLocation.BACK_RIGHT, moduleStatesList[3]
-        );
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
 
         for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
-            double rawAngle = moduleStates.get(wheel).angle.getDegrees();
+            double rawAngle = moduleStates[wheel.index].angle.getDegrees();
             setDesiredWheelAngle(wheel, -rawAngle);
         }
     }
@@ -351,7 +357,49 @@ public class Drivetrain extends SubsystemBase {
         return rotationPIDController.atSetpoint();
     }
 
-    public int getEncoderPosiiton(MotorLocation pos) {
+    public int getEncoderPosititon(MotorLocation pos) {
         return pos.driveEncoder.getRaw();
+    }
+
+    /**
+     * Get the gyro position as clockwise degrees
+     *
+     * @return the gyro angle as clockwise degrees
+     */
+    public double getGyroDegrees() {
+        return gyro.getAngle();
+    }
+
+    /**
+     * Get the gyro position as a Rotation2d.
+     *
+     * @return a Rotation2d representing the gyro position
+     */
+    public Rotation2d getGyroRotation() {
+        return Rotation2d.fromDegrees(-gyro.getAngle()); // negate to reverse direction (CW to CCW)
+    }
+
+    /**
+     * Resets the gyro position and updates the odometry as well.
+     */
+    public void resetGyro() {
+        gyro.reset();
+        odometry.resetPosition(odometry.getPoseMeters(), getGyroRotation());
+    }
+
+    /**
+     * Gets the current pose of the robot
+     * @return Pose2d representing the position+rotation of the robot
+     */
+    public Pose2d getPose() {
+        return currentPose;
+    }
+
+    /**
+     * Gets the SwerveDriveKinematics of the drivetrain.
+     * @return the SwerveDriveKinematics for the drivetrain
+     */
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
     }
 }

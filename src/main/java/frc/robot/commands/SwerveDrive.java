@@ -24,34 +24,24 @@ import java.util.function.DoubleSupplier;
 public class SwerveDrive extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
-    //Object handles the high level math for calculating wheel speeds and angles
-    private final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
-            Drivetrain.MotorLocation.FRONT_LEFT.coordinates,
-            Drivetrain.MotorLocation.FRONT_RIGHT.coordinates,
-            Drivetrain.MotorLocation.BACK_LEFT.coordinates,
-            Drivetrain.MotorLocation.BACK_RIGHT.coordinates
-    );
-
     private final Drivetrain drivetrain;
 
     private DoubleSupplier rightInput;
     private DoubleSupplier forwardInput;
     private DoubleSupplier rotationInput;
-    private DoubleSupplier gyro;
 
     /**
      * Creates a new SwerveDrive.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public SwerveDrive(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation, DoubleSupplier getGyroAngle) {
+    public SwerveDrive(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
         drivetrain = subsystem;
         rightInput = getRight;
         forwardInput = getForward;
         rotationInput = getRotation;
-        gyro = getGyroAngle;
 
-        //Declare dependency on the drivetrain subsystem
+        // Declare dependency on the drivetrain subsystem
         addRequirements(subsystem);
     }
 
@@ -70,35 +60,26 @@ public class SwerveDrive extends CommandBase {
             drivetrain.stopDriveMotors();
         }
 
-        //Create a WPILib object representing the desired velocity of the robot
+        // Create a WPILib object representing the desired velocity of the robot
         ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 x * 2.0,
                 y * 2.0,
                 -z * Math.PI * 2,
-                Rotation2d.fromDegrees(gyro.getAsDouble())
+                drivetrain.getGyroRotation()
         );
 
-        //Calculates the desired state for each swerve module
-        SwerveModuleState[] moduleStatesList = swerveDriveKinematics.toSwerveModuleStates(desiredSpeeds);
+        // Calculates the desired state for each swerve module
+        SwerveModuleState[] moduleStates = drivetrain.getKinematics().toSwerveModuleStates(desiredSpeeds);
 
-        Map<Drivetrain.MotorLocation, SwerveModuleState> moduleStates = Map.of(
-                Drivetrain.MotorLocation.FRONT_LEFT, moduleStatesList[0],
-                Drivetrain.MotorLocation.FRONT_RIGHT, moduleStatesList[1],
-                Drivetrain.MotorLocation.BACK_LEFT, moduleStatesList[2],
-                Drivetrain.MotorLocation.BACK_RIGHT, moduleStatesList[3]
-        );
 
-        //Set the drive motor speeds
         for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-            drivetrain.setDriveMotorSpeed(loc, moduleStates.get(loc).speedMetersPerSecond / 2.0);
-        }
+            // Set the drive motor speeds
+            drivetrain.setDriveMotorSpeed(loc, moduleStates[loc.index].speedMetersPerSecond / 2.0);
 
-        //Set the desired steering angles
-        for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
-            double rawAngle = moduleStates.get(wheel).angle.getDegrees();
-            drivetrain.setDesiredWheelAngle(wheel, -rawAngle);
+            // Set the desired steering angles
+            double rawAngle = moduleStates[loc.index].angle.getDegrees();
+            drivetrain.setDesiredWheelAngle(loc, -rawAngle);
         }
-
     }
 
     // Called once the command ends or is interrupted.
