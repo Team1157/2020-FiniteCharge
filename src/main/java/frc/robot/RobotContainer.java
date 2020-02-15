@@ -19,8 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.*;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.VisionLights;
+import frc.robot.subsystems.*;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -34,6 +33,9 @@ public class RobotContainer {
     private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
     private final Drivetrain drivetrain = new Drivetrain();
+    private final Intake intake = new Intake();
+    private final Shooter shooter = new Shooter();
+    private final Gate gate = new Gate();
     private final VisionLights visionLights = new VisionLights();
 
     private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
@@ -177,6 +179,15 @@ public class RobotContainer {
                 visionLights,
                 gyro::getAngle
         ));
+
+        JoystickButton intakeForwardsButton = new JoystickButton(secondaryStick, Constants.intakeForwardsButtonNumber);
+        intakeForwardsButton.whileHeld(new IntakeForwards(intake));
+        JoystickButton intakeBackwardsButton = new JoystickButton(secondaryStick, Constants.intakeBackwardsButtonNumber);
+        intakeBackwardsButton.whileHeld(new IntakeBackwards(intake));
+        JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
+        spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
+        JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
+        shootButton.whileHeld(new Shoot(gate));
     }
 
 

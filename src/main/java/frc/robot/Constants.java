@@ -40,7 +40,11 @@ public final class Constants {
     public static int backIntakeRelayPort = 2;
 
     //Joystick
-    public static int visionAlignButtonNumber = 1;
+    public static int intakeForwardsButtonNumber = 3;
+    public static int intakeBackwardsButtonNumber = 5;
+    public static int spinUpFlywheelButtonNumber = 2;
+    public static int shootButtonNumber = 1;
+    public static int visionAlignButtonNumber = 4;
 
     public static double[] joystickSensitivityRange = {0.25, 1};
     public static double joystickDeadZone = 0.05;

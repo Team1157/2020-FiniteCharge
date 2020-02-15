@@ -14,7 +14,7 @@ import frc.robot.subsystems.Shooter;
 /**
  * An example command that uses an example subsystem.
  */
-public class spinUpShooter extends CommandBase {
+public class SpinUpShooter extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final Shooter shooter;
     private float speed;
@@ -25,7 +25,7 @@ public class spinUpShooter extends CommandBase {
      * @param subsystem The subsystem used by this command.
      * @param speed The desired speed, with 1 being maximum speed
      */
-    public spinUpShooter(Shooter subsystem, float speed) {
+    public SpinUpShooter(Shooter subsystem, float speed) {
         shooter = subsystem;
         this.speed = speed;
         // Use addRequirements() here to declare subsystem dependencies.
