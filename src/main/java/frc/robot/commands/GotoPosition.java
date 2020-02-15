@@ -6,9 +6,9 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
 /**
- * Drives to specific coordinates in feet(?) relative to the center of the robot.
+ * Drives to specific coordinates relative to the defined 0,0 point in Drivetrain.odometry
  */
-public class DriveToRelative extends CommandBase {
+public class GotoPosition extends CommandBase {
     private Drivetrain drivetrain;
     private ProfiledPIDController pidController;
 
@@ -16,7 +16,7 @@ public class DriveToRelative extends CommandBase {
     double targetDistance;
     double distanceTraveled;
 
-    public DriveToRelative(Drivetrain drivetrain, double x, double y) {
+    public GotoPosition(Drivetrain drivetrain, double x, double y) {
         this.drivetrain = drivetrain;
         targetAngle = (Math.atan(y/x) * 180 / Math.PI) - 90; // Get target angle, convert to degrees CCW from forward
         targetDistance = Math.sqrt(x*x + y*y);
@@ -31,14 +31,13 @@ public class DriveToRelative extends CommandBase {
         drivetrain.setDesiredWheelAngle(Drivetrain.MotorLocation.BACK_LEFT, targetAngle);
         drivetrain.setDesiredWheelAngle(Drivetrain.MotorLocation.BACK_RIGHT, targetAngle);
 
-        distanceTraveled = drivetrain.
         pidController.setGoal(targetDistance);
         pidController.reset(0, 0);
     }
 
     @Override
     public void execute() {
-        pidController.calculate()
+        //pidController.calculate()
     }
 
     @Override

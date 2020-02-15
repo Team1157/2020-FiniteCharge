@@ -388,18 +388,22 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Gets the current pose of the robot
-     * @return Pose2d representing the position+rotation of the robot
-     */
-    public Pose2d getPose() {
-        return currentPose;
-    }
-
-    /**
      * Gets the SwerveDriveKinematics of the drivetrain.
      * @return the SwerveDriveKinematics for the drivetrain
      */
     public SwerveDriveKinematics getKinematics() {
         return kinematics;
+    }
+
+    /**
+     * Gets the SwerveDriveOdometry of the drivetrain.
+     * @return the SwerveDriveOdometry for the drivetrain.
+     */
+    public SwerveDriveOdometry getOdometry() {
+        return odometry;
+    }
+
+    public void updateOdometry() {
+        //odometry.update(getGyroRotation(), kinematics.toSwerveModuleStates())
     }
 }

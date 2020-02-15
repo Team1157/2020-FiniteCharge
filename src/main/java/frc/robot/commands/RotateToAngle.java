@@ -19,7 +19,6 @@ public class RotateToAngle extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final Drivetrain drivetrain;
     private double targetAngle;
-    private DoubleSupplier gyroAngle;
 
     /**
      * Creates a new RotateToAngle command.
@@ -27,10 +26,9 @@ public class RotateToAngle extends CommandBase {
      * @param subsystem The subsystem used by this command.
      * @param targetAngleParam The desired angle
      */
-    public RotateToAngle(Drivetrain subsystem, double targetAngleParam, DoubleSupplier getGyroAngle) {
+    public RotateToAngle(Drivetrain subsystem, double targetAngleParam) {
         drivetrain = subsystem;
         targetAngle = targetAngleParam;
-        gyroAngle = getGyroAngle;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
@@ -46,7 +44,7 @@ public class RotateToAngle extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        drivetrain.updateRotationPID(gyroAngle.getAsDouble());
+        drivetrain.updateRotationPID(drivetrain.getGyroDegrees());
     }
 
     // Called once the command ends or is interrupted.
