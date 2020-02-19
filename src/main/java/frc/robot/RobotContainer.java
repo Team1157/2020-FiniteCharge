@@ -180,7 +180,7 @@ public class RobotContainer {
         JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
-        shootButton.whileHeld(new Shoot(gate)
+        shootButton.whileHeld(new Shoot(gate));
     }
 
 
