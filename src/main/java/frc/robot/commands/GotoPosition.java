@@ -51,14 +51,14 @@ public class GotoPosition extends CommandBase {
         double distanceToTarget = startPosition.minus(pose.getTranslation()).getNorm();
         double speed = pidController.calculate(distanceToTarget);
 
-        // Set speed
+        // Set speeds
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 unitVelocity.getX() * speed,
                 unitVelocity.getY() * speed,
                 0,
                 drivetrain.getGyroRotation()
         );
-        drivetrain.setChassisSpeeds(chassisSpeeds); // Apply speed
+        drivetrain.setChassisSpeeds(chassisSpeeds); // Apply speeds
     }
 
     @Override

@@ -36,6 +36,7 @@ public class RobotContainer {
     private final Shooter shooter = new Shooter();
     private final Gate gate = new Gate();
     private final VisionLights visionLights = new VisionLights();
+    private final Climber climber = new Climber();
 
     private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
     private final ShuffleboardTab tab = Shuffleboard.getTab("Vision Debug");
@@ -181,6 +182,8 @@ public class RobotContainer {
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new Shoot(gate));
+        JoystickButton climbButton = new JoystickButton(secondaryStick, Constants.climberUpButtonNumber);
+        climbButton.whileHeld(new Climb(climber));
     }
 
 
