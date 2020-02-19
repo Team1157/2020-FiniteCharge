@@ -144,8 +144,8 @@ public class RobotContainer {
                         this::getRotationInput,
                         gyro::getAngle
                 ));
-
         SmartDashboard.putData("Reset Gyro", new ResetGyro(gyro));
+        SmartDashboard.putData(shooter);
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs
@@ -210,6 +210,5 @@ public class RobotContainer {
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
         SmartDashboard.putBoolean("Pi Online", visionTable.getEntry("FramesAvailable").getBoolean(false));
-        SmartDashboard.putNumber("Forward Input", getForwardInput());
     }
 }

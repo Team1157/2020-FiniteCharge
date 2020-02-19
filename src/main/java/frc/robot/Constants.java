@@ -21,15 +21,15 @@ public final class Constants {
     public static double steeringEncoderPulsesPerRevolution = steeringEncoderMax - steeringEncoderMin;
 
     //CAN
-    public static int frontLeftDriveMotorNumber = 0;
-    public static int frontRightDriveMotorNumber = 1;
-    public static int backLeftDriveMotorNumber = 2;
-    public static int backRightDriveMotorNumber = 3;
-    public static int frontLeftSteeringMotorNumber = 4;
-    public static int frontRightSteeringMotorNumber = 5;
-    public static int backLeftSteeringMotorNumber = 6;
-    public static int backRightSteeringMotorNumber = 7;
-    public static int shooterMotorNumber = 8;
+    public static int frontLeftDriveMotorNumber = 1;
+    public static int frontRightDriveMotorNumber = 2;
+    public static int backLeftDriveMotorNumber = 3;
+    public static int backRightDriveMotorNumber = 4;
+    public static int frontLeftSteeringMotorNumber = 5;
+    public static int frontRightSteeringMotorNumber = 6;
+    public static int backLeftSteeringMotorNumber = 7;
+    public static int backRightSteeringMotorNumber = 8;
+    public static int shooterMotorNumber = 9;
 
     //PWM
     public static int gateServoPort = 0;
@@ -47,5 +47,5 @@ public final class Constants {
     public static int visionAlignButtonNumber = 4;
 
     public static double[] joystickSensitivityRange = {0.25, 1};
-    public static double joystickDeadZone = 0.05;
+    public static double joystickDeadZone = 0.1;
 }

@@ -94,6 +94,8 @@ public class Drivetrain extends SubsystemBase {
             talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution));
             talon.configFeedbackNotContinuous(true, 0);
 
+            loc.driveMotor.setInverted(true);
+
             Encoder encoder = loc.driveEncoder;
             encoder.setReverseDirection(true);
         }

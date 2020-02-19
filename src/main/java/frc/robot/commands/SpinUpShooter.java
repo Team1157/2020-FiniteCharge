@@ -35,12 +35,12 @@ public class SpinUpShooter extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        shooter.setSpeed(speed);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        shooter.setSpeed(speed);
     }
 
     // Called once the command ends or is interrupted.

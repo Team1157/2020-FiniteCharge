@@ -19,14 +19,15 @@ public class Gate extends SubsystemBase {
      */
     public Gate() {
         servo = new Servo(Constants.gateServoPort);
+        closeGate();
     }
 
     public void openGate() {
-        servo.set(1);
+        servo.set(0.24);
     }
 
     public void closeGate() {
-        servo.set(0);
+        servo.set(0.686);
     }
 
     @Override
