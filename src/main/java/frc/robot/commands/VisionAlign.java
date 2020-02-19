@@ -24,7 +24,6 @@ public class VisionAlign extends CommandBase {
 
     private final Drivetrain drivetrain;
     private final VisionLights visionSubsystem;
-    private final DoubleSupplier gyroAngle;
     private final NetworkTableEntry getAngleToTarget;
     private final NetworkTableEntry getTargetFound;
 
@@ -40,10 +39,9 @@ public class VisionAlign extends CommandBase {
      * @param drivetrainSubsystem The Drivetrain subsystem
      * @param visionLightsSubsystem The VisionLights subsystem
      */
-    public VisionAlign(Drivetrain drivetrainSubsystem, VisionLights visionLightsSubsystem, DoubleSupplier getGyroAngle) {
+    public VisionAlign(Drivetrain drivetrainSubsystem, VisionLights visionLightsSubsystem) {
         drivetrain = drivetrainSubsystem;
         visionSubsystem = visionLightsSubsystem;
-        gyroAngle = getGyroAngle;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(drivetrain);
         addRequirements(visionSubsystem);
@@ -69,7 +67,7 @@ public class VisionAlign extends CommandBase {
         if (getTargetFound.getBoolean(false)) {
             double angleToTarget = getAngleToTarget.getDouble(1000);
             if (angleToTarget != lastAngleToTarget) {
-                targetAngle = (gyroAngle.getAsDouble() + angleToTarget) % 360;
+                targetAngle = (drivetrain.getGyroDegrees() + angleToTarget) % 360;
                 if (targetAngle < 0) {
                     targetAngle += 360;
                 }
@@ -79,7 +77,7 @@ public class VisionAlign extends CommandBase {
             lastAngleToTarget = 1000;
         }
 
-        drivetrain.updateRotationPID(gyroAngle.getAsDouble());
+        drivetrain.updateRotationPID(drivetrain.getGyroDegrees());
     }
 
     // Called once the command ends or is interrupted.

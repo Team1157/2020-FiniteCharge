@@ -30,7 +30,6 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     private final Joystick primaryStick = new Joystick(0);
     private final Joystick secondaryStick = new Joystick(1);
-    private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
     private final Drivetrain drivetrain = new Drivetrain();
     private final Intake intake = new Intake();
@@ -134,18 +133,17 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
-        SmartDashboard.putData("Gyro", gyro);
+        SmartDashboard.putData("Gyro", drivetrain.gyro);
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(
                         drivetrain,
                         this::getRightInput,
                         this::getForwardInput,
-                        this::getRotationInput,
-                        gyro::getAngle
+                        this::getRotationInput
                 ));
-        SmartDashboard.putData("Reset Gyro", new ResetGyro(gyro));
-        SmartDashboard.putData(shooter);
+
+        SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs
@@ -153,8 +151,7 @@ public class RobotContainer {
                         drivetrain,
                         this::getRightInput,
                         this::getForwardInput,
-                        this::getRotationInput,
-                        gyro::getAngle
+                        this::getRotationInput
                 ));
         // Configure the button bindings
         configureButtonBindings();
@@ -174,11 +171,7 @@ public class RobotContainer {
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
         }
-        visionAlignButton.whileHeld(new VisionAlign(
-                drivetrain,
-                visionLights,
-                gyro::getAngle
-        ));
+        visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights));
 
         JoystickButton intakeForwardsButton = new JoystickButton(secondaryStick, Constants.intakeForwardsButtonNumber);
         intakeForwardsButton.whileHeld(new IntakeForwards(intake));
@@ -187,7 +180,7 @@ public class RobotContainer {
         JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
-        shootButton.whileHeld(new Shoot(gate));
+        shootButton.whileHeld(new Shoot(gate)
     }
 
 
