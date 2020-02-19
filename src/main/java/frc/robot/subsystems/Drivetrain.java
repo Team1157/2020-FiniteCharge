@@ -7,9 +7,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Map;
-import java.util.function.DoubleSupplier;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
@@ -31,6 +28,8 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
     private final double STEERING_ANGLE_TOLERANCE = 3; //In degrees
+    private final double DRIVE_ENCODER_COUNTS_PER_METER = 20 * 6.67 /(4 * 0.0254 * Math.PI);
+    // 20 encoder counts/rot, 6.67:1 gear ratio, 4 inch wheel dia., 0.0254 meters per inch
 
     /**
      * Stores data for each swerve module.
@@ -139,13 +138,13 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("FL Angle", getWheelAngle(MotorLocation.FRONT_LEFT));
+        SmartDashboard.putNumber("FL Angle", getWheelDegrees(MotorLocation.FRONT_LEFT));
         SmartDashboard.putNumber("FL Encoder",  MotorLocation.FRONT_LEFT.steeringMotor.getSelectedSensorPosition());
-        SmartDashboard.putNumber("FR Angle", getWheelAngle(MotorLocation.FRONT_RIGHT));
+        SmartDashboard.putNumber("FR Angle", getWheelDegrees(MotorLocation.FRONT_RIGHT));
         SmartDashboard.putNumber("FR Encoder",  MotorLocation.FRONT_RIGHT.steeringMotor.getSelectedSensorPosition());
-        SmartDashboard.putNumber("BL Angle", getWheelAngle(MotorLocation.BACK_LEFT));
+        SmartDashboard.putNumber("BL Angle", getWheelDegrees(MotorLocation.BACK_LEFT));
         SmartDashboard.putNumber("BL Encoder",  MotorLocation.BACK_LEFT.steeringMotor.getSelectedSensorPosition());
-        SmartDashboard.putNumber("BR Angle", getWheelAngle(MotorLocation.BACK_RIGHT));
+        SmartDashboard.putNumber("BR Angle", getWheelDegrees(MotorLocation.BACK_RIGHT));
         SmartDashboard.putNumber("BR Encoder",  MotorLocation.BACK_RIGHT.steeringMotor.getSelectedSensorPosition());
 
         SmartDashboard.putBoolean("Wheels Within Tolerance", areAllWheelsWithinTolerance());
@@ -222,7 +221,7 @@ public class Drivetrain extends SubsystemBase {
      * @param wheel The wheel to find the angle of
      * @return The calculated angle, in degrees, counterclockwise from the initial position, from 0 to 360
      */
-    public double getWheelAngle(MotorLocation wheel) {
+    public double getWheelDegrees(MotorLocation wheel) {
         WPI_TalonSRX talon = wheel.steeringMotor;
 
         //Get the position of the encoder, in raw units
@@ -232,6 +231,13 @@ public class Drivetrain extends SubsystemBase {
         double angle =  ((encoderTicks - wheel.zeroPos) / Constants.steeringEncoderPulsesPerRevolution * 360) % 360;
         if (angle < 0) {angle += 360;}
         return angle;
+    }
+
+    /**
+     * Get the angle of the wheel as Rotation2d
+     */
+    public Rotation2d getWheelRotation(MotorLocation wheel) {
+        return new Rotation2d(-getWheelDegrees(wheel)/180*Math.PI);
     }
 
     /**
@@ -268,7 +274,7 @@ public class Drivetrain extends SubsystemBase {
         if (target_angle < 0) {target_angle += 360;}
 
         WPI_TalonSRX talon = wheel.steeringMotor;
-        double current_angle = getWheelAngle(wheel);
+        double current_angle = getWheelDegrees(wheel);
         double displacement = getAngleDifference(current_angle, target_angle);
 
 
@@ -376,7 +382,7 @@ public class Drivetrain extends SubsystemBase {
      * @return a Rotation2d representing the gyro position
      */
     public Rotation2d getGyroRotation() {
-        return Rotation2d.fromDegrees(-gyro.getAngle()); // negate to reverse direction (CW to CCW)
+        return Rotation2d.fromDegrees(-gyro.getAngle()*Math.PI/180); // negate to reverse direction (CW to CCW)
     }
 
     /**
@@ -405,5 +411,36 @@ public class Drivetrain extends SubsystemBase {
 
     public void updateOdometry() {
         //odometry.update(getGyroRotation(), kinematics.toSwerveModuleStates())
+    }
+
+    /**
+     * Gets the state of the swerve module
+     * @param module the swerve module to get the state of
+     * @return a SwerveModuleState representing the rotation and speed of the module
+     */
+    public SwerveModuleState getSwerveState(MotorLocation module) {
+        return new SwerveModuleState(
+                module.driveEncoder.getRate() / DRIVE_ENCODER_COUNTS_PER_METER,
+                getWheelRotation(module)
+        );
+    }
+
+    /**
+     * Takes the given ChassisSpeeds and applies them to the drive and steering motors
+     * @param chassisSpeeds the ChassisSpeeds to use
+     */
+    public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        // Calculates the desired state for each swerve module
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
+
+
+        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+            // Set the drive motor speeds
+            setDriveMotorSpeed(loc, moduleStates[loc.index].speedMetersPerSecond / 2.0);
+
+            // Set the desired steering angles
+            double rawAngle = moduleStates[loc.index].angle.getDegrees();
+            setDesiredWheelAngle(loc, -rawAngle);
+        }
     }
 }

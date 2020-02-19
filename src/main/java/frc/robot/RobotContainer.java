@@ -131,7 +131,7 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
-        SmartDashboard.putData("Gyro", drivetrain.gyro);
+//        SmartDashboard.putData("Gyro", drivetrain.gyro);
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(

@@ -68,18 +68,7 @@ public class SwerveDrive extends CommandBase {
                 drivetrain.getGyroRotation()
         );
 
-        // Calculates the desired state for each swerve module
-        SwerveModuleState[] moduleStates = drivetrain.getKinematics().toSwerveModuleStates(desiredSpeeds);
-
-
-        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-            // Set the drive motor speeds
-            drivetrain.setDriveMotorSpeed(loc, moduleStates[loc.index].speedMetersPerSecond / 2.0);
-
-            // Set the desired steering angles
-            double rawAngle = moduleStates[loc.index].angle.getDegrees();
-            drivetrain.setDesiredWheelAngle(loc, -rawAngle);
-        }
+        drivetrain.setChassisSpeeds(desiredSpeeds);
     }
 
     // Called once the command ends or is interrupted.
