@@ -38,17 +38,8 @@ public class GotoPosition extends CommandBase {
 
     @Override
     public void execute() {
-        // Update Odometry + get new pose
-        Pose2d pose = drivetrain.getOdometry().update(
-                drivetrain.getGyroRotation(),
-                drivetrain.getSwerveState(Drivetrain.MotorLocation.FRONT_LEFT),
-                drivetrain.getSwerveState(Drivetrain.MotorLocation.FRONT_RIGHT),
-                drivetrain.getSwerveState(Drivetrain.MotorLocation.BACK_LEFT),
-                drivetrain.getSwerveState(Drivetrain.MotorLocation.BACK_RIGHT)
-        );
-
         // Update PID with new position
-        double distanceToTarget = startPosition.minus(pose.getTranslation()).getNorm();
+        double distanceToTarget = startPosition.minus(drivetrain.getOdometry().getPoseMeters().getTranslation()).getNorm();
         double speed = pidController.calculate(distanceToTarget);
 
         // Set speeds

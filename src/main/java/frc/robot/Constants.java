@@ -46,7 +46,8 @@ public final class Constants {
     public static int spinUpFlywheelButtonNumber = 2;
     public static int shootButtonNumber = 1;
     public static int visionAlignButtonNumber = 4;
-    public static int climberUpButtonNumber = 6;
+    public static int climbUpButtonNumber = 6;
+    public static int climbDownButtonNumber = 7;
 
     public static double[] joystickSensitivityRange = {0.25, 1};
     public static double joystickDeadZone = 0.1;

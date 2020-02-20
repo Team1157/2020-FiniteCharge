@@ -5,14 +5,22 @@ import frc.robot.subsystems.Climber;
 
 public class Climb extends CommandBase {
     private Climber climber;
+    private boolean direction;
 
-    public Climb(Climber climber) {
+
+    public Climb(Climber climber, boolean direction) {
         this.climber = climber;
+        this.direction = direction;
     }
 
     @Override
     public void execute() {
-        climber.up();
+        if (direction) {
+            climber.up();
+        }
+        else {
+            climber.down();
+        }
     }
 
     @Override
