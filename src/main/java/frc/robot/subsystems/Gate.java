@@ -8,30 +8,35 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Gate extends SubsystemBase {
-    private Servo servo;
+    private Spark gateMotor;
+    private float speed = 0;
 
     /**
      * Creates a new Gate.
      */
+
     public Gate() {
-        servo = new Servo(Constants.gateServoPort);
+        gateMotor = new Spark(Constants.gateSparkPort);
         closeGate();
     }
 
     public void openGate() {
-        servo.set(0.24);
+        speed = -1;
     }
 
     public void closeGate() {
-        servo.set(0.686);
+        speed = 1;
     }
 
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        gateMotor.set(speed);
     }
 }

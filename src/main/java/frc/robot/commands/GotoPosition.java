@@ -23,13 +23,13 @@ public class GotoPosition extends CommandBase {
     public GotoPosition(Drivetrain drivetrain, Translation2d target) {
         this.drivetrain = drivetrain;
         startPosition = drivetrain.getOdometry().getPoseMeters().getTranslation();
-        targetPosition = target;
+        targetPosition = target; //TODO Convert normal people position into stupid wpilib position
 
         Translation2d diff = targetPosition.minus(startPosition);
         unitVelocity = diff.div(diff.getNorm()); // Unit vector pointing at target from starting position
         pidController = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(1, 1));
         pidController.setGoal(diff.getNorm()); // Set PID target to total distance to target
-        pidController.reset(0, 0);
+        pidController.reset(0, 0); //TODO PID should be based on distance to target
     }
 
     @Override

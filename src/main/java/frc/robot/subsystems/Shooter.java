@@ -13,27 +13,23 @@ import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     private WPI_TalonSRX shooterTalon;
-    float speed;
 
     /**
      * Creates a new Shooter.
      */
     public Shooter() {
         shooterTalon = new WPI_TalonSRX(Constants.shooterMotorNumber);
-        speed = 0;
     }
 
     public void setSpeed(float speed) {
-        this.speed = speed;
+        shooterTalon.set(speed);
     }
 
     public void stop() {
-        speed = 0;
         shooterTalon.set(0);
     }
 
     @Override
     public void periodic() {
-        shooterTalon.set(speed);
     }
 }

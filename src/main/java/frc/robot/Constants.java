@@ -32,7 +32,7 @@ public final class Constants {
     public static int shooterMotorNumber = 9;
 
     //PWM
-    public static int gateServoPort = 0;
+    public static int gateSparkPort = 0;
 
     //Relay
     public static int visionLightsRelayPort = 0;
