@@ -149,7 +149,19 @@ public class Drivetrain extends SubsystemBase {
         SmartDashboard.putNumber("BR Angle", getWheelDegrees(MotorLocation.BACK_RIGHT));
         SmartDashboard.putNumber("BR Encoder",  MotorLocation.BACK_RIGHT.steeringMotor.getSelectedSensorPosition());
 
+        SmartDashboard.putNumber("X", odometry.getPoseMeters().getTranslation().getX());
+        SmartDashboard.putNumber("Y", odometry.getPoseMeters().getTranslation().getY());
+
         SmartDashboard.putBoolean("Wheels Within Tolerance", areAllWheelsWithinTolerance());
+
+        // Update Odometry
+        getOdometry().update(
+                getGyroRotation(),
+                getSwerveState(Drivetrain.MotorLocation.FRONT_LEFT),
+                getSwerveState(Drivetrain.MotorLocation.FRONT_RIGHT),
+                getSwerveState(Drivetrain.MotorLocation.BACK_LEFT),
+                getSwerveState(Drivetrain.MotorLocation.BACK_RIGHT)
+        );
     }
 
     /**

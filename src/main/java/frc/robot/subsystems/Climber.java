@@ -7,20 +7,34 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
+    public Relay winchMotor;
+
     /**
-     * Creates a new ExampleSubsystem.
+     * Creates a new Climber
      */
-
-
     public Climber() {
-
+        winchMotor = new Relay(Constants.winchRelayPort);
     }
 
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+    }
+
+    public void up() {
+        winchMotor.set(Relay.Value.kForward);
+    }
+
+    public void down() {
+        winchMotor.set(Relay.Value.kReverse);
+    }
+
+    public void stop() {
+        winchMotor.set(Relay.Value.kOff);
     }
 }
