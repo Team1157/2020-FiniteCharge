@@ -136,6 +136,8 @@ public class Drivetrain extends SubsystemBase {
         rotationPIDController = new PIDController(0, 0, 0);
         rotationPIDController.setTolerance(PID_TOLERANCE);
         rotationPIDController.enableContinuousInput(0, 360);
+
+        SmartDashboard.putData("Gyro", gyro);
     }
 
     @Override
@@ -396,7 +398,7 @@ public class Drivetrain extends SubsystemBase {
      * @return a Rotation2d representing the gyro position
      */
     public Rotation2d getGyroRotation() {
-        return Rotation2d.fromDegrees(-gyro.getAngle()*Math.PI/180); // negate to reverse direction (CW to CCW)
+        return Rotation2d.fromDegrees(gyro.getAngle());
     }
 
     /**

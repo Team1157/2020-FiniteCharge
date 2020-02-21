@@ -134,7 +134,7 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
-//        SmartDashboard.putData("Gyro", drivetrain.gyro);
+
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(
@@ -155,6 +155,7 @@ public class RobotContainer {
                         this::getForwardInput,
                         this::getRotationInput
                 ));
+        gate.setDefaultCommand(new CloseGate(gate));
         // Configure the button bindings
         configureButtonBindings();
 
@@ -182,7 +183,7 @@ public class RobotContainer {
         JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
-        shootButton.whileHeld(new Shoot(gate));
+        shootButton.whileHeld(new OpenGate(gate));
         JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbUpButtonNumber);
         climbUpButton.whileHeld(new Climb(climber, true)); // up
         JoystickButton climbDownButton = new JoystickButton(secondaryStick, Constants.climbDownButtonNumber);
