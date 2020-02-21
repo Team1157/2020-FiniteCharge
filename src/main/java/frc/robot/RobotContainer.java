@@ -39,8 +39,9 @@ public class RobotContainer {
     private final Climber climber = new Climber();
 
     private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
-    private final ShuffleboardTab tab = Shuffleboard.getTab("Vision Debug");
-    private NetworkTableEntry visionDebugChooser = tab.add("Vision Debug", false)
+    private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
+    private final ShuffleboardTab visionDebugTab = Shuffleboard.getTab("Vision Debug");
+    private NetworkTableEntry visionDebugChooser = visionDebugTab.add("Vision Debug", false)
             .withWidget(BuiltInWidgets.kToggleSwitch)
             .getEntry();
 
@@ -58,7 +59,7 @@ public class RobotContainer {
      *
      * @return The input, from -1 to 1
      */
-    public double getForwardInput() {
+    private double getForwardInput() {
         double raw_input;
         switch (current_input_mode) {
             case ONE_STICK:
@@ -80,7 +81,7 @@ public class RobotContainer {
      *
      * @return The input, from -1 to 1
      */
-    public double getRightInput() {
+    private double getRightInput() {
         double raw_input;
         switch (current_input_mode) {
             case ONE_STICK:
@@ -102,7 +103,7 @@ public class RobotContainer {
      *
      * @return The input, from -1 to 1, with positive being counterclockwise
      */
-    public double getRotationInput() {
+    private double getRotationInput() {
         double raw_input;
         double sensitivity;
         switch (current_input_mode) {
@@ -134,6 +135,11 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
+        SmartDashboard.putNumber("Y Distance to Bumper", 2.43);
+        SmartDashboard.setPersistent("Y Distance to Bumper");
+
+        autoCommandChooser.setDefaultOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
+        SmartDashboard.putData("Auto Command", autoCommandChooser);
 
 
         SmartDashboard.putData("Swerve Test",
@@ -197,7 +203,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return null;
+        return autoCommandChooser.getSelected();
     }
 
     void periodic() {

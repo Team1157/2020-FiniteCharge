@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -19,12 +21,14 @@ public class ThreeBallAuto extends SequentialCommandGroup {
     private Shooter shooter;
     private Gate gate;
 
-    public ThreeBallAuto(Pose2d startingPosition, Drivetrain drivetrain, Shooter shooter, Gate gate, Intake intake, VisionLights visionLights) {
+    public ThreeBallAuto(Drivetrain drivetrain, Shooter shooter, Gate gate, Intake intake, VisionLights visionLights) {
         this.intake = intake;
         this.shooter = shooter;
         this.gate = gate;
 
-        Translation2d translationToGoal = Constants.powerPortLocation.minus(startingPosition.getTranslation());
+        double startingYPosition = SmartDashboard.getNumber("Y Distance to Bumper", 2.43) / 39.37; //in to m
+        Translation2d startingPosition = new Translation2d(13.17, startingYPosition);
+        Translation2d translationToGoal = Constants.powerPortLocation.minus(startingPosition);
         double degreesToGoal = (Math.atan2(translationToGoal.getY(), translationToGoal.getX()) + 180) % 360;
 
         addCommands(
