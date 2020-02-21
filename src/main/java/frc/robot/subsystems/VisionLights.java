@@ -35,7 +35,7 @@ public class VisionLights extends SubsystemBase {
      */
     public void setLightState(boolean state) {
         if(state) {
-            relay.set(Relay.Value.kReverse);
+            relay.set(Relay.Value.kForward);
         } else {
             relay.set(Relay.Value.kOff);
         }

@@ -135,10 +135,11 @@ public class RobotContainer {
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
-        SmartDashboard.putNumber("Y Distance to Bumper", 2.43);
+        SmartDashboard.putNumber("Y Distance to Bumper", 77.42);
         SmartDashboard.setPersistent("Y Distance to Bumper");
 
-        autoCommandChooser.setDefaultOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
+        autoCommandChooser.setDefaultOption("None", null);
+        autoCommandChooser.addOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
         SmartDashboard.putData("Auto Command", autoCommandChooser);
 
 
@@ -151,7 +152,6 @@ public class RobotContainer {
                 ));
 
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
-        SmartDashboard.putData("Climber", climber);
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs
@@ -176,7 +176,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         JoystickButton visionAlignButton;
         if (current_input_mode == INPUT_MODE.ONE_STICK) {
-            visionAlignButton = new JoystickButton(primaryStick, Constants.visionAlignButtonNumber);
+            visionAlignButton = new JoystickButton(primaryStick, 1);
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
         }

@@ -154,8 +154,6 @@ public class Drivetrain extends SubsystemBase {
         SmartDashboard.putNumber("X", odometry.getPoseMeters().getTranslation().getX());
         SmartDashboard.putNumber("Y", odometry.getPoseMeters().getTranslation().getY());
 
-        SmartDashboard.putBoolean("Wheels Within Tolerance", areAllWheelsWithinTolerance());
-
         // Update Odometry
         getOdometry().update(
                 getGyroRotation(),
@@ -398,7 +396,7 @@ public class Drivetrain extends SubsystemBase {
      * @return a Rotation2d representing the gyro position
      */
     public Rotation2d getGyroRotation() {
-        return Rotation2d.fromDegrees(gyro.getAngle());
+        return Rotation2d.fromDegrees(getGyroDegrees());
     }
 
     /**
