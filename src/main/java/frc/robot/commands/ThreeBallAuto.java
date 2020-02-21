@@ -26,7 +26,7 @@ public class ThreeBallAuto extends SequentialCommandGroup {
         this.shooter = shooter;
         this.gate = gate;
 
-        double startingYPosition = SmartDashboard.getNumber("Y Distance to Bumper", 2.43) / 39.37; //in to m
+        double startingYPosition = (SmartDashboard.getNumber("Y Distance to Bumper", 77.42) + 18.25) / 39.37; //in to m
         Translation2d startingPosition = new Translation2d(13.17, startingYPosition);
         Translation2d translationToGoal = Constants.powerPortLocation.minus(startingPosition);
         double degreesToGoal = (Math.atan2(translationToGoal.getY(), translationToGoal.getX()) + 180) % 360;
