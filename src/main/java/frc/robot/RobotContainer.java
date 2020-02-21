@@ -174,7 +174,7 @@ public class RobotContainer {
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
         }
-        visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights));
+        visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights, false));
 
         JoystickButton intakeForwardsButton = new JoystickButton(secondaryStick, Constants.intakeForwardsButtonNumber);
         intakeForwardsButton.whileHeld(new IntakeForwards(intake));

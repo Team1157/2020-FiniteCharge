@@ -27,7 +27,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
-    private final double STEERING_ANGLE_TOLERANCE = 3; //In degrees
+    public static final double STEERING_ANGLE_TOLERANCE = 3; //In degrees
     private final double DRIVE_ENCODER_COUNTS_PER_METER = 20 * 6.67 /(4 * 0.0254 * Math.PI);
     // 20 encoder counts/rot, 6.67:1 gear ratio, 4 inch wheel dia., 0.0254 meters per inch
 
@@ -389,7 +389,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the gyro angle as clockwise degrees
      */
     public double getGyroDegrees() {
-        return gyro.getAngle();
+        return (gyro.getAngle() + 180) % 360;
     }
 
     /**

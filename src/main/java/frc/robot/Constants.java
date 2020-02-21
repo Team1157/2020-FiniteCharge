@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants.  This class should not be used for any other purpose.  All constants should be
@@ -16,6 +18,8 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    public static Translation2d powerPortLocation = new Translation2d(15.98, 2.43);
+
     public static int steeringEncoderMax = 885;
     public static int steeringEncoderMin = 9;
     public static double steeringEncoderPulsesPerRevolution = steeringEncoderMax - steeringEncoderMin;

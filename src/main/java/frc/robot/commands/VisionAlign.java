@@ -27,6 +27,8 @@ public class VisionAlign extends CommandBase {
     private final NetworkTableEntry getAngleToTarget;
     private final NetworkTableEntry getTargetFound;
 
+    private boolean endWhenAligned;
+
     private double targetAngle;
 
     private NetworkTable visionTable;
@@ -38,8 +40,9 @@ public class VisionAlign extends CommandBase {
      *
      * @param drivetrainSubsystem The Drivetrain subsystem
      * @param visionLightsSubsystem The VisionLights subsystem
+     * @param endWhenAligned Whether the command should exit when it detects it's aligned
      */
-    public VisionAlign(Drivetrain drivetrainSubsystem, VisionLights visionLightsSubsystem) {
+    public VisionAlign(Drivetrain drivetrainSubsystem, VisionLights visionLightsSubsystem, boolean endWhenAligned) {
         drivetrain = drivetrainSubsystem;
         visionSubsystem = visionLightsSubsystem;
         // Use addRequirements() here to declare subsystem dependencies.
@@ -90,6 +93,6 @@ public class VisionAlign extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return false;
+        return endWhenAligned && lastAngleToTarget < Drivetrain.STEERING_ANGLE_TOLERANCE && drivetrain.isRotationPIDWithinTolerance();
     }
 }
