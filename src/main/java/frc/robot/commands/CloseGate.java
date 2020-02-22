@@ -22,7 +22,7 @@ public class CloseGate extends CommandBase {
 
     @Override
     public void execute() {
-        if (timer.get() >= 0.75) {
+        if (timer.get() >= 1) {
             timer.stop();
             timer.reset();
             gate.stop();

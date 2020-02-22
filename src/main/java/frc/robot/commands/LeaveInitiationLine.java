@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
@@ -17,6 +18,8 @@ public class LeaveInitiationLine extends CommandBase {
 
     @Override
     public void initialize() {
+        System.out.println("init");
+        timer.stop();;
         timer.reset();
         timer.start();
     }
@@ -24,7 +27,7 @@ public class LeaveInitiationLine extends CommandBase {
     @Override
     public void execute() {
         drivetrain.setChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                1,
+                0.5,
                 0,
                 0,
                 drivetrain.getGyroRotation()
@@ -33,6 +36,7 @@ public class LeaveInitiationLine extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        System.out.println("End");
         timer.stop();
         drivetrain.stopDriveMotors();
     }

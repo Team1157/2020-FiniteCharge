@@ -139,9 +139,11 @@ public class RobotContainer {
         SmartDashboard.setPersistent("Y Distance to Bumper");
 
         autoCommandChooser.setDefaultOption("None", null);
+        autoCommandChooser.addOption("No Vision Auto", new NoVisionAuto(drivetrain, shooter, gate, intake, visionLights));
         autoCommandChooser.addOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
         SmartDashboard.putData("Auto Command", autoCommandChooser);
 
+        SmartDashboard.putData(new LeaveInitiationLine(drivetrain));
 
         SmartDashboard.putData("Swerve Test",
                 new SwerveTest(
@@ -152,6 +154,7 @@ public class RobotContainer {
                 ));
 
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
+        SmartDashboard.putData("Drivetrain", drivetrain);
 
         drivetrain.setDefaultCommand(
                 //Allows the swerve drive command to access the joystick inputs

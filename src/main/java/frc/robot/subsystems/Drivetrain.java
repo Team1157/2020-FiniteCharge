@@ -444,6 +444,7 @@ public class Drivetrain extends SubsystemBase {
      * @param chassisSpeeds the ChassisSpeeds to use
      */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        System.out.println("Setting speeds: " + chassisSpeeds.vxMetersPerSecond);
         // Calculates the desired state for each swerve module
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
 
