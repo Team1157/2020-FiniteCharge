@@ -10,7 +10,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.*;
 
 /**
- * Align with vision, shoots the three preloaded balls, and leave the initiation line
+ * Shoot the three preloaded balls and leave the initiation line
  */
 public class NoVisionAuto extends SequentialCommandGroup {
     private Intake intake;
@@ -21,6 +21,7 @@ public class NoVisionAuto extends SequentialCommandGroup {
         this.intake = intake;
         this.shooter = shooter;
         this.gate = gate;
+        addRequirements(drivetrain);
 
         double startingYPosition = (SmartDashboard.getNumber("Y Distance to Bumper", 77.42) + 18.25) / 39.37; //in to m
         Translation2d startingPosition = new Translation2d(13.17, startingYPosition);

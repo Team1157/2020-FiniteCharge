@@ -33,16 +33,16 @@ public class SwerveDrive extends CommandBase {
     /**
      * Creates a new SwerveDrive.
      *
-     * @param subsystem The subsystem used by this command.
+     * @param drivetrain The subsystem used by this command.
      */
-    public SwerveDrive(Drivetrain subsystem, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
-        drivetrain = subsystem;
+    public SwerveDrive(Drivetrain drivetrain, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
+        this.drivetrain = drivetrain;
         rightInput = getRight;
         forwardInput = getForward;
         rotationInput = getRotation;
 
         // Declare dependency on the drivetrain subsystem
-        addRequirements(subsystem);
+        addRequirements(drivetrain);
     }
 
     // Called when the command is initially scheduled.

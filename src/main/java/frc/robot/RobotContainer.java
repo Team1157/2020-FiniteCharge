@@ -156,14 +156,6 @@ public class RobotContainer {
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
         SmartDashboard.putData("Drivetrain", drivetrain);
 
-        drivetrain.setDefaultCommand(
-                //Allows the swerve drive command to access the joystick inputs
-                new SwerveDrive(
-                        drivetrain,
-                        this::getRightInput,
-                        this::getForwardInput,
-                        this::getRotationInput
-                ));
         gate.setDefaultCommand(new CloseGate(gate));
         // Configure the button bindings
         configureButtonBindings();
@@ -207,6 +199,16 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoCommandChooser.getSelected();
+    }
+
+    void scheduleTeleopCommands() {
+        drivetrain.setDefaultCommand(
+            new SwerveDrive(
+                    drivetrain,
+                    this::getRightInput,
+                    this::getForwardInput,
+                    this::getRotationInput
+            ));
     }
 
     void periodic() {

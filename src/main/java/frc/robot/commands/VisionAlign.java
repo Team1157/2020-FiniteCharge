@@ -43,6 +43,8 @@ public class VisionAlign extends CommandBase {
      * @param endWhenAligned Whether the command should exit when it detects it's aligned
      */
     public VisionAlign(Drivetrain drivetrainSubsystem, VisionLights visionLightsSubsystem, boolean endWhenAligned) {
+        this.endWhenAligned = endWhenAligned;
+
         drivetrain = drivetrainSubsystem;
         visionSubsystem = visionLightsSubsystem;
         // Use addRequirements() here to declare subsystem dependencies.
@@ -60,7 +62,7 @@ public class VisionAlign extends CommandBase {
     @Override
     public void initialize() {
         visionSubsystem.setLightState(true);
-        drivetrain.configurePIDLoop(-0.02, 0.001, 0);
+        drivetrain.configurePIDLoop(-0.05, 0.001, 0);
         drivetrain.initRotationPID();
     }
 
@@ -76,6 +78,7 @@ public class VisionAlign extends CommandBase {
                 }
                 drivetrain.setRotationPIDSetpoint(targetAngle);
             }
+            lastAngleToTarget = angleToTarget;
         } else {
             lastAngleToTarget = 1000;
         }
@@ -93,6 +96,8 @@ public class VisionAlign extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return endWhenAligned && lastAngleToTarget < Drivetrain.STEERING_ANGLE_TOLERANCE && drivetrain.isRotationPIDWithinTolerance();
+        System.out.println("Angle: " + lastAngleToTarget + " Tolerance: " + Drivetrain.STEERING_ANGLE_TOLERANCE);
+        System.out.println("Within PID :" + drivetrain.isRotationPIDWithinTolerance());
+        return endWhenAligned && Math.abs(lastAngleToTarget) < Drivetrain.STEERING_ANGLE_TOLERANCE && drivetrain.isRotationPIDWithinTolerance();
     }
 }

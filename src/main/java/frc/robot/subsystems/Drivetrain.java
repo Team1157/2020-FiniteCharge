@@ -312,9 +312,10 @@ public class Drivetrain extends SubsystemBase {
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0, 0, -1);
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
 
-        for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
-            double rawAngle = moduleStates[wheel.index].angle.getDegrees();
-            setDesiredWheelAngle(wheel, -rawAngle);
+        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+            // Set the desired steering angles
+            double rawAngle = moduleStates[loc.index].angle.getDegrees();
+            setDesiredWheelAngle(loc, -rawAngle);
         }
     }
 
@@ -444,7 +445,6 @@ public class Drivetrain extends SubsystemBase {
      * @param chassisSpeeds the ChassisSpeeds to use
      */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        System.out.println("Setting speeds: " + chassisSpeeds.vxMetersPerSecond);
         // Calculates the desired state for each swerve module
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
 

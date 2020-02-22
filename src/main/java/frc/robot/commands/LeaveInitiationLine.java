@@ -18,7 +18,6 @@ public class LeaveInitiationLine extends CommandBase {
 
     @Override
     public void initialize() {
-        System.out.println("init");
         timer.stop();;
         timer.reset();
         timer.start();
@@ -36,7 +35,6 @@ public class LeaveInitiationLine extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.println("End");
         timer.stop();
         drivetrain.stopDriveMotors();
     }
