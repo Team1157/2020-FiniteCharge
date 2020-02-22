@@ -30,7 +30,7 @@ public class NoVisionAuto extends SequentialCommandGroup {
 
         addCommands(
                 new ScheduleCommand(new RotateToAngle(drivetrain, degreesToGoal)),
-                new ScheduleCommand(new SpinUpShooter(shooter, 0.4)),
+                new ScheduleCommand(new SpinUpShooter(shooter, 1)),
                 new WaitCommand(2),
                 new ScheduleCommand(new OpenGate(gate)),
                 new WaitCommand(2.5),
