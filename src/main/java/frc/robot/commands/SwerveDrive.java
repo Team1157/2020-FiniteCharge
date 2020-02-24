@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
-import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 
@@ -23,6 +23,7 @@ import java.util.function.DoubleSupplier;
  */
 public class SwerveDrive extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    boolean fieldRelative;
 
     private final Drivetrain drivetrain;
 
@@ -35,14 +36,20 @@ public class SwerveDrive extends CommandBase {
      *
      * @param drivetrain The subsystem used by this command.
      */
-    public SwerveDrive(Drivetrain drivetrain, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
+    public SwerveDrive(Drivetrain drivetrain, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation, boolean fieldRelative) {
         this.drivetrain = drivetrain;
         rightInput = getRight;
         forwardInput = getForward;
         rotationInput = getRotation;
 
+        this.fieldRelative = fieldRelative;
+
         // Declare dependency on the drivetrain subsystem
         addRequirements(drivetrain);
+    }
+
+    public SwerveDrive(Drivetrain drivetrain, DoubleSupplier getRight, DoubleSupplier getForward, DoubleSupplier getRotation) {
+        this(drivetrain, getRight, getForward, getRotation, true);
     }
 
     // Called when the command is initially scheduled.
@@ -61,12 +68,23 @@ public class SwerveDrive extends CommandBase {
         }
 
         // Create a WPILib object representing the desired velocity of the robot
-        ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                x * 2.0,
-                y * 2.0,
-                -z * Math.PI * 2,
-                drivetrain.getGyroRotation()
-        );
+        ChassisSpeeds desiredSpeeds;
+        if (fieldRelative) {
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    x * 2.0,
+                    y * 2.0,
+                    -z * Math.PI * 2,
+                    drivetrain.getGyroRotation()
+            );
+        } else {
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    x * 2.0,
+                    y * 2.0,
+                    -z * Math.PI * 2,
+                    Rotation2d.fromDegrees(0)
+            );
+        }
+
 
         drivetrain.setChassisSpeeds(desiredSpeeds);
     }

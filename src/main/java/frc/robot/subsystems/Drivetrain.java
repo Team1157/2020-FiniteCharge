@@ -27,7 +27,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
-    public static final double STEERING_ANGLE_TOLERANCE = 3; //In degrees
+    public static final double STEERING_ANGLE_TOLERANCE = 10; //In degrees
     private final double DRIVE_ENCODER_COUNTS_PER_METER = 20 * 6.67 /(4 * 0.0254 * Math.PI);
     // 20 encoder counts/rot, 6.67:1 gear ratio, 4 inch wheel dia., 0.0254 meters per inch
 
@@ -38,7 +38,7 @@ public class Drivetrain extends SubsystemBase {
         FRONT_LEFT(
                 0,
                 new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates
-                308, // zeroPos: Zero
+                301, // zeroPos: Zero
                 new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to SC for drive
                 new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber), // steerMotor: Reference to SC for steer
                 new Encoder(0, 1) // driveEncoder: reference to encoder for drive CIM
@@ -46,7 +46,7 @@ public class Drivetrain extends SubsystemBase {
         FRONT_RIGHT(
                 1,
                 new Translation2d(0.269875, 0.320675),
-                415,
+                398,
                 new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
                 new Encoder(2, 3)
@@ -54,7 +54,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_LEFT(
                 2,
                 new Translation2d(-0.269875, -0.320675),
-                620,
+                560,
                 new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
                 new Encoder(4, 5)
@@ -62,7 +62,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_RIGHT(
                 3,
                 new Translation2d(-0.269875, 0.320675),
-                433,
+                455,
                 new WPI_VictorSPX(Constants.backRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backRightSteeringMotorNumber),
                 new Encoder(6, 7)
@@ -110,6 +110,7 @@ public class Drivetrain extends SubsystemBase {
             talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution));
             talon.configFeedbackNotContinuous(true, 0);
 
+            loc.driveMotor.configFactoryDefault();
             loc.driveMotor.setInverted(true);
 
             Encoder encoder = loc.driveEncoder;
@@ -170,6 +171,7 @@ public class Drivetrain extends SubsystemBase {
      * @param speed the desired motor speed, from -1 to 1
      */
     public void setDriveMotorSpeed(MotorLocation motor, double speed) {
+        speed = Math.copySign(Math.min(Math.abs(speed), 0.5), speed);
         if (motor.inverted) {
             speed = -speed;
         }

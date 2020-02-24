@@ -41,7 +41,7 @@ public class ArcadeDrive extends CommandBase {
     public void initialize() {
         //Point each wheel straight forwards
         for(Drivetrain.MotorLocation wheel : Drivetrain.MotorLocation.values()) {
-            drivetrain.setDesiredWheelAngle(wheel, 0);
+            //drivetrain.setDesiredWheelAngle(wheel, 0);
         }
     }
 

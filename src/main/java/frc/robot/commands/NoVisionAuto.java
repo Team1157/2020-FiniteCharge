@@ -29,7 +29,7 @@ public class NoVisionAuto extends SequentialCommandGroup {
         double degreesToGoal = (Math.atan2(translationToGoal.getY(), translationToGoal.getX()) + 180) % 360;
 
         addCommands(
-                new ScheduleCommand(new RotateToAngle(drivetrain, degreesToGoal)),
+                //new ScheduleCommand(new RotateToAngle(drivetrain, degreesToGoal)),
                 new ScheduleCommand(new SpinUpShooter(shooter, 1)),
                 new WaitCommand(2),
                 new ScheduleCommand(new OpenGate(gate)),

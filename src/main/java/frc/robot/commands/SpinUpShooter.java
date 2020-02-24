@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Shooter;
 
@@ -15,8 +16,10 @@ import frc.robot.subsystems.Shooter;
  */
 public class SpinUpShooter extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    private Timer timer = new Timer();
     private final Shooter shooter;
-    private double speed;
+    private double speed = 0;
+    private double target_speed;
 
     /**
      * Creates a new spinUpShooter.
@@ -26,7 +29,7 @@ public class SpinUpShooter extends CommandBase {
      */
     public SpinUpShooter(Shooter subsystem, double speed) {
         shooter = subsystem;
-        this.speed = speed;
+        this.target_speed = speed;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
@@ -34,11 +37,14 @@ public class SpinUpShooter extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        timer.reset();
+        timer.start();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        speed = target_speed * Math.min(target_speed * timer.get(), 1);
         shooter.setSpeed(speed);
     }
 
@@ -46,6 +52,7 @@ public class SpinUpShooter extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         shooter.stop();
+        timer.stop();
     }
 
     // Returns true when the command should end.

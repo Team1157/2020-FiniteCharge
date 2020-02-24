@@ -53,6 +53,6 @@ public final class Constants {
     public static int climbUpButtonNumber = 6;
     public static int climbDownButtonNumber = 7;
 
-    public static double[] joystickSensitivityRange = {0.25, 1};
+    public static double[] joystickSensitivityRange = {0.25, 0.5};
     public static double joystickDeadZone = 0.1;
 }

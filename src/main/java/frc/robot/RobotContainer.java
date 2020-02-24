@@ -40,6 +40,7 @@ public class RobotContainer {
 
     private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
     private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
+    private final SendableChooser<Command> fieldRelativeChooser = new SendableChooser<>();
     private final ShuffleboardTab visionDebugTab = Shuffleboard.getTab("Vision Debug");
     private NetworkTableEntry visionDebugChooser = visionDebugTab.add("Vision Debug", false)
             .withWidget(BuiltInWidgets.kToggleSwitch)
@@ -136,12 +137,31 @@ public class RobotContainer {
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
         SmartDashboard.putData("Input Mode", inputModeChooser);
         SmartDashboard.putNumber("Y Distance to Bumper", 77.42);
-        SmartDashboard.setPersistent("Y Distance to Bumper");
+        SmartDashboard.putNumber("Auto Shooter Speed", 1);
 
         autoCommandChooser.setDefaultOption("None", null);
         autoCommandChooser.addOption("No Vision Auto", new NoVisionAuto(drivetrain, shooter, gate, intake, visionLights));
         autoCommandChooser.addOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
         SmartDashboard.putData("Auto Command", autoCommandChooser);
+
+        fieldRelativeChooser.setDefaultOption("Field Relative",
+            new SwerveDrive(
+                drivetrain,
+                this::getRightInput,
+                this::getForwardInput,
+                this::getRotationInput,
+                true
+            ));
+        fieldRelativeChooser.addOption("Robot Relative",
+                new SwerveDrive(
+                        drivetrain,
+                        this::getRightInput,
+                        this::getForwardInput,
+                        this::getRotationInput,
+                        false
+                ));
+        fieldRelativeChooser.addOption("Arcade Drive", new ArcadeDrive(drivetrain, this::getForwardInput, this::getRightInput));
+        SmartDashboard.putData("Field Relative Chooser", fieldRelativeChooser);
 
         SmartDashboard.putData(new LeaveInitiationLine(drivetrain));
 
@@ -182,7 +202,7 @@ public class RobotContainer {
         JoystickButton intakeBackwardsButton = new JoystickButton(secondaryStick, Constants.intakeBackwardsButtonNumber);
         intakeBackwardsButton.whileHeld(new IntakeBackwards(intake));
         JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
-        spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1));
+        spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 0.9));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
         JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbUpButtonNumber);
@@ -203,12 +223,8 @@ public class RobotContainer {
 
     void scheduleTeleopCommands() {
         drivetrain.setDefaultCommand(
-            new SwerveDrive(
-                    drivetrain,
-                    this::getRightInput,
-                    this::getForwardInput,
-                    this::getRotationInput
-            ));
+                fieldRelativeChooser.getSelected()
+        );
     }
 
     void periodic() {

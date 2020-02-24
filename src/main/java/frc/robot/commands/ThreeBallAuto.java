@@ -33,7 +33,7 @@ public class ThreeBallAuto extends SequentialCommandGroup {
 
         addCommands(
                 new ScheduleCommand(new RotateToAngle(drivetrain, degreesToGoal)),
-                new ScheduleCommand(new SpinUpShooter(shooter, 1)),
+                new ScheduleCommand(new SpinUpShooter(shooter, SmartDashboard.getNumber("Auto Shooter Speed", 1))),
                 new ParallelCommandGroup(
                         new VisionAlign(drivetrain, visionLights, true),
                         new WaitCommand(2)
