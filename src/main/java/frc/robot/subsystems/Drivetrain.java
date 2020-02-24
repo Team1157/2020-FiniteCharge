@@ -112,6 +112,7 @@ public class Drivetrain extends SubsystemBase {
 
             loc.driveMotor.configFactoryDefault();
             loc.driveMotor.setInverted(true);
+            loc.driveMotor.configOpenloopRamp(Constants.drivetrainAcceleration);
 
             Encoder encoder = loc.driveEncoder;
             encoder.setReverseDirection(true);

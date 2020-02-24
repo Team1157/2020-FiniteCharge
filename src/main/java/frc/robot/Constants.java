@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 public final class Constants {
     public static Translation2d powerPortLocation = new Translation2d(15.98, 2.43);
 
+    //Drivetrain
+    public static double drivetrainAcceleration = 1; //Seconds from neutral to full
     public static int steeringEncoderMax = 885;
     public static int steeringEncoderMin = 9;
     public static double steeringEncoderPulsesPerRevolution = steeringEncoderMax - steeringEncoderMin;
