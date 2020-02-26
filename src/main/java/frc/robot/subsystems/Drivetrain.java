@@ -91,7 +91,6 @@ public class Drivetrain extends SubsystemBase {
     private final PIDController rotationPIDController;
     private final SwerveDriveKinematics kinematics;
     private final SwerveDriveOdometry odometry;
-    private Pose2d currentPose;
 
     private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
 
@@ -103,12 +102,11 @@ public class Drivetrain extends SubsystemBase {
         for (MotorLocation loc : MotorLocation.values()) {
             WPI_TalonSRX talon = loc.steeringMotor;
             talon.configFactoryDefault();
-            talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
-            talon.config_kP(0, 4);
-            talon.config_kD(0, 8);
+            talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+            talon.config_kP(0, 10);
+            talon.config_kD(0, 0);
             talon.config_kI(0, 0);
-            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.steeringEncoderPulsesPerRevolution));
-            talon.configFeedbackNotContinuous(true, 0);
+            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.relativePulsesPerRevolution));
 
             loc.driveMotor.configFactoryDefault();
             loc.driveMotor.setInverted(true);
@@ -135,7 +133,7 @@ public class Drivetrain extends SubsystemBase {
         MotorLocation.BACK_LEFT.steeringMotor.setInverted(false);
         MotorLocation.BACK_RIGHT.steeringMotor.setInverted(false);
 
-        rotationPIDController = new PIDController(0, 0, 0);
+        rotationPIDController = new PIDController(0, 0, 0); //TODO
         rotationPIDController.setTolerance(PID_TOLERANCE);
         rotationPIDController.enableContinuousInput(0, 360);
 
@@ -158,11 +156,11 @@ public class Drivetrain extends SubsystemBase {
 
         // Update Odometry
         getOdometry().update(
-                getGyroRotation(),
-                getSwerveState(Drivetrain.MotorLocation.FRONT_LEFT),
-                getSwerveState(Drivetrain.MotorLocation.FRONT_RIGHT),
-                getSwerveState(Drivetrain.MotorLocation.BACK_LEFT),
-                getSwerveState(Drivetrain.MotorLocation.BACK_RIGHT)
+            getGyroRotation(),
+            getSwerveState(Drivetrain.MotorLocation.FRONT_LEFT),
+            getSwerveState(Drivetrain.MotorLocation.FRONT_RIGHT),
+            getSwerveState(Drivetrain.MotorLocation.BACK_LEFT),
+            getSwerveState(Drivetrain.MotorLocation.BACK_RIGHT)
         );
     }
 
@@ -172,7 +170,7 @@ public class Drivetrain extends SubsystemBase {
      * @param speed the desired motor speed, from -1 to 1
      */
     public void setDriveMotorSpeed(MotorLocation motor, double speed) {
-        speed = Math.copySign(Math.min(Math.abs(speed), 0.5), speed);
+        speed = Math.copySign(Math.min(Math.abs(speed), Constants.drivetrainMaxSpeed), speed);
         if (motor.inverted) {
             speed = -speed;
         }
@@ -223,7 +221,7 @@ public class Drivetrain extends SubsystemBase {
      * Find the displacement between the two angles with the smallest magnitude, assuming 0 degrees is equal to 360 degrees
      * @param angle1 The value of the initial angle, in degrees
      * @param angle2 THe value of the final angle, in degrees
-     * @return The calculted displacement, in degrees
+     * @return The calculated displacement, in degrees
      */
     private double getAngleDifference(double angle1, double angle2) {
         if (Math.abs(angle2 - angle1) <= 360 - Math.abs(angle2 - angle1)) {
@@ -242,12 +240,13 @@ public class Drivetrain extends SubsystemBase {
         WPI_TalonSRX talon = wheel.steeringMotor;
 
         //Get the position of the encoder, in raw units
-        int encoderTicks = Math.min(Math.max(talon.getSelectedSensorPosition(), Constants.steeringEncoderMin), Constants.steeringEncoderMax);
+        int encoderTicks = talon.getSelectedSensorPosition();
 
         //Convert the encoder position to a wheel angle
-        double angle =  ((encoderTicks - wheel.zeroPos) / Constants.steeringEncoderPulsesPerRevolution * 360) % 360;
+        double angle =  (encoderTicks / Constants.relativePulsesPerRevolution * 360) % 360;
         if (angle < 0) {angle += 360;}
         return angle;
+
     }
 
     /**
@@ -264,7 +263,7 @@ public class Drivetrain extends SubsystemBase {
      * @return Whether the wheel is within tolerance
      */
     private boolean isWheelWithinTolerance(MotorLocation wheel) {
-        return Math.abs(wheel.steeringMotor.getClosedLoopError()) < (int) (20 / 360.0 * Constants.steeringEncoderPulsesPerRevolution);
+        return Math.abs(wheel.steeringMotor.getClosedLoopError()) < (int) (20 / 360.0 * Constants.analogEncoderPulsesPerRevolution);
     }
 
     /**
@@ -304,7 +303,7 @@ public class Drivetrain extends SubsystemBase {
         }
 
         int current_encoder_position = talon.getSelectedSensorPosition();
-        double desiredEncoderPosition = current_encoder_position + displacement * Constants.steeringEncoderPulsesPerRevolution / 360.0;
+        double desiredEncoderPosition = current_encoder_position + displacement * Constants.relativePulsesPerRevolution / 360.0;
         talon.set(ControlMode.Position, desiredEncoderPosition);
     }
 

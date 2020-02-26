@@ -153,25 +153,25 @@ public class RobotContainer {
                 true
             ));
         fieldRelativeChooser.addOption("Robot Relative",
-                new SwerveDrive(
-                        drivetrain,
-                        this::getRightInput,
-                        this::getForwardInput,
-                        this::getRotationInput,
-                        false
-                ));
+            new SwerveDrive(
+                drivetrain,
+                this::getRightInput,
+                this::getForwardInput,
+                this::getRotationInput,
+                false
+            ));
         fieldRelativeChooser.addOption("Arcade Drive", new ArcadeDrive(drivetrain, this::getForwardInput, this::getRightInput));
-        SmartDashboard.putData("Field Relative Chooser", fieldRelativeChooser);
+        SmartDashboard.putData("Field Relative", fieldRelativeChooser);
 
         SmartDashboard.putData(new LeaveInitiationLine(drivetrain));
 
         SmartDashboard.putData("Swerve Test",
-                new SwerveTest(
-                        drivetrain,
-                        this::getRightInput,
-                        this::getForwardInput,
-                        this::getRotationInput
-                ));
+            new SwerveTest(
+                drivetrain,
+                this::getRightInput,
+                this::getForwardInput,
+                this::getRotationInput
+            ));
 
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
         SmartDashboard.putData("Drivetrain", drivetrain);
