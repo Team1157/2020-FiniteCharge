@@ -25,7 +25,7 @@ public final class Constants {
     public static double drivetrainMaxSpeed = 1;
     public static int analogEncoderMax = 885;
     public static int analogEncoderMin = 9;
-    public static double analogEncoderPulsesPerRevolution = analogEncoderMax - analogEncoderMin;
+    public static double analogPulsesPerRevolution = analogEncoderMax - analogEncoderMin;
     public static double relativePulsesPerRevolution = 1662.25;
 
     //CAN

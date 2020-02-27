@@ -55,6 +55,8 @@ public class RobotContainer {
     public static NetworkTable visionTable;
     public static NetworkTableInstance networkTableInstance;
 
+    private boolean startupCommandRun = false;
+
     /**
      * Returns the current forward input from a joystick or other input device, based on the current control mode
      *
