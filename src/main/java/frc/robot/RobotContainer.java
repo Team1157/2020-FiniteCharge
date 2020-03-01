@@ -175,6 +175,9 @@ public class RobotContainer {
                 this::getRotationInput
             ));
 
+        CalibrateEncoders calibrateEncoders = new CalibrateEncoders(drivetrain);
+        SmartDashboard.putData("Zero Absolute Encoders", calibrateEncoders);
+
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
         SmartDashboard.putData("Drivetrain", drivetrain);
 

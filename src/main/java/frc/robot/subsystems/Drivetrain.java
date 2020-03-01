@@ -26,6 +26,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import frc.robot.Constants;
+import frc.robot.commands.CalibrateEncoders;
 
 public class Drivetrain extends SubsystemBase {
     public static final double STEERING_ANGLE_TOLERANCE = 10; //In degrees
@@ -39,7 +40,7 @@ public class Drivetrain extends SubsystemBase {
         FRONT_LEFT(
                 0,
                 new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates
-                301, // zeroPos: Zero
+                32, // zeroPos: Zero
                 new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to SC for drive
                 new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber), // steerMotor: Reference to SC for steer
                 new Encoder(0, 1) // driveEncoder: reference to encoder for drive CIM
@@ -47,7 +48,7 @@ public class Drivetrain extends SubsystemBase {
         FRONT_RIGHT(
                 1,
                 new Translation2d(0.269875, 0.320675),
-                398,
+                351,
                 new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
                 new Encoder(2, 3)
@@ -55,7 +56,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_LEFT(
                 2,
                 new Translation2d(-0.269875, -0.320675),
-                560,
+                345,
                 new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
                 new Encoder(4, 5)
@@ -63,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_RIGHT(
                 3,
                 new Translation2d(-0.269875, 0.320675),
-                455,
+                442,
                 new WPI_VictorSPX(Constants.backRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backRightSteeringMotorNumber),
                 new Encoder(6, 7)
@@ -108,8 +109,6 @@ public class Drivetrain extends SubsystemBase {
         for (MotorLocation loc : MotorLocation.values()) {
             WPI_TalonSRX talon = loc.steeringMotor;
             talon.configFactoryDefault();
-            talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
-            talon.configFeedbackNotContinuous(true, 0);
 
             loc.driveMotor.configFactoryDefault();
             loc.driveMotor.setInverted(true);
@@ -118,6 +117,7 @@ public class Drivetrain extends SubsystemBase {
             Encoder encoder = loc.driveEncoder;
             encoder.setReverseDirection(true);
         }
+        configForAbsoluteEncoders();
 
         //Create kinematics and odometry
         kinematics = new SwerveDriveKinematics(
@@ -132,11 +132,14 @@ public class Drivetrain extends SubsystemBase {
                 new Pose2d() // Default position 0,0 - set real position on Shuffleboard?
         );
 
-        rotationPIDController = new PIDController(0, 0, 0); //TODO
+        rotationPIDController = new PIDController(0, 0, 0);
         rotationPIDController.setTolerance(PID_TOLERANCE);
         rotationPIDController.enableContinuousInput(0, 360);
 
         SmartDashboard.putData("Gyro", gyro);
+
+        startupTimer.reset();
+        startupTimer.start();
     }
 
     @Override
@@ -153,6 +156,8 @@ public class Drivetrain extends SubsystemBase {
             for (MotorLocation loc : MotorLocation.values()) {
                 int absEncoderPos = loc.absoluteEncoderPosAtStartup;
                 double currentRotation = (absEncoderPos - loc.absoluteEncoderZero) / Constants.analogPulsesPerRevolution;
+                System.out.println(loc.name() + " analogPos: " + absEncoderPos);
+                System.out.println(loc.name() + " analogZero: " + loc.absoluteEncoderZero);
                 int currentRelativePos = loc.steeringMotor.getSelectedSensorPosition();
                 double relativeZero = currentRelativePos - currentRotation * Constants.relativePulsesPerRevolution;
                 relativeZero = relativeZero % Constants.relativePulsesPerRevolution;
@@ -175,8 +180,8 @@ public class Drivetrain extends SubsystemBase {
         SmartDashboard.putNumber("BR Angle", getWheelDegrees(MotorLocation.BACK_RIGHT));
         SmartDashboard.putNumber("BR Encoder",  MotorLocation.BACK_RIGHT.steeringMotor.getSelectedSensorPosition());
 
-        SmartDashboard.putNumber("X", odometry.getPoseMeters().getTranslation().getX());
-        SmartDashboard.putNumber("Y", odometry.getPoseMeters().getTranslation().getY());
+        //SmartDashboard.putNumber("X", odometry.getPoseMeters().getTranslation().getX());
+        //SmartDashboard.putNumber("Y", odometry.getPoseMeters().getTranslation().getY());
 
         // Update Odometry
         getOdometry().update(
@@ -494,6 +499,14 @@ public class Drivetrain extends SubsystemBase {
             talon.config_kI(0, 0);
             talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.relativePulsesPerRevolution));
             talon.setInverted(true);
+        }
+    }
+
+    public void configForAbsoluteEncoders() {
+        for (MotorLocation loc : MotorLocation.values()) {
+            WPI_TalonSRX talon = loc.steeringMotor;
+            talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
+            talon.configFeedbackNotContinuous(true, 0);
         }
     }
 }
