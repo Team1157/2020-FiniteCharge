@@ -30,6 +30,7 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     private final Joystick primaryStick = new Joystick(0);
     private final Joystick secondaryStick = new Joystick(1);
+    private final XboxController xboxController = new XboxController(0);
 
     private final Drivetrain drivetrain = new Drivetrain();
     private final Intake intake = new Intake();
@@ -49,7 +50,8 @@ public class RobotContainer {
     private INPUT_MODE current_input_mode = INPUT_MODE.ONE_STICK;
     public enum INPUT_MODE {
         ONE_STICK,
-        TWO_STICK
+        TWO_STICK,
+        XBOX
     }
 
     public static NetworkTable visionTable;
@@ -68,6 +70,9 @@ public class RobotContainer {
             case ONE_STICK:
             case TWO_STICK:
                 raw_input =  -primaryStick.getY();
+                break;
+            case XBOX:
+                raw_input = -xboxController.getRawAxis(1);
                 break;
             default:
                 raw_input = 0;
@@ -90,6 +95,9 @@ public class RobotContainer {
             case ONE_STICK:
             case TWO_STICK:
                 raw_input = primaryStick.getX();
+                break;
+            case XBOX:
+                raw_input = xboxController.getRawAxis(0);
                 break;
             default:
                 raw_input = 0;
@@ -118,6 +126,10 @@ public class RobotContainer {
                 raw_input = -secondaryStick.getX();
                 sensitivity = -secondaryStick.getRawAxis(2);
                 break;
+            case XBOX:
+                raw_input = -xboxController.getRawAxis(4);
+                sensitivity = -xboxController.getRawAxis(3);
+                break;
             default:
                 raw_input = 0;
                 sensitivity = 0;
@@ -125,6 +137,7 @@ public class RobotContainer {
         if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
         double sensitivityMin = Constants.joystickSensitivityRange[0];
         double sensitivityMax = Constants.joystickSensitivityRange[1];
+        System.out.println(raw_input);
         return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
     }
 
@@ -137,6 +150,7 @@ public class RobotContainer {
 
         inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
         inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
+        inputModeChooser.addOption("Xbox", INPUT_MODE.XBOX);
         SmartDashboard.putData("Input Mode", inputModeChooser);
         SmartDashboard.putNumber("Y Distance to Bumper", 77.42);
         SmartDashboard.putNumber("Auto Shooter Speed", 1);
@@ -195,7 +209,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         JoystickButton visionAlignButton;
-        if (current_input_mode == INPUT_MODE.ONE_STICK) {
+        if (current_input_mode != INPUT_MODE.TWO_STICK) {
             visionAlignButton = new JoystickButton(primaryStick, 1);
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
@@ -207,13 +221,15 @@ public class RobotContainer {
         JoystickButton intakeBackwardsButton = new JoystickButton(secondaryStick, Constants.intakeBackwardsButtonNumber);
         intakeBackwardsButton.whileHeld(new IntakeBackwards(intake));
         JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
-        spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 0.9));
+        spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1.0));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
         JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbUpButtonNumber);
         climbUpButton.whileHeld(new Climb(climber, true)); // up
         JoystickButton climbDownButton = new JoystickButton(secondaryStick, Constants.climbDownButtonNumber);
         climbDownButton.whileHeld(new Climb(climber, false)); // down
+        JoystickButton resetGyroButton = new JoystickButton(primaryStick, Constants.resetGyroButtonNumber);
+        resetGyroButton.whileHeld(new ResetGyro(drivetrain));
     }
 
 

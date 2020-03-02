@@ -40,7 +40,7 @@ public class Drivetrain extends SubsystemBase {
         FRONT_LEFT(
                 0,
                 new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates
-                32, // zeroPos: Zero
+                874, // zeroPos: Zero
                 new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to SC for drive
                 new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber), // steerMotor: Reference to SC for steer
                 new Encoder(0, 1) // driveEncoder: reference to encoder for drive CIM
@@ -56,7 +56,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_LEFT(
                 2,
                 new Translation2d(-0.269875, -0.320675),
-                345,
+                347,
                 new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
                 new Encoder(4, 5)
@@ -64,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
         BACK_RIGHT(
                 3,
                 new Translation2d(-0.269875, 0.320675),
-                442,
+                426,
                 new WPI_VictorSPX(Constants.backRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backRightSteeringMotorNumber),
                 new Encoder(6, 7)

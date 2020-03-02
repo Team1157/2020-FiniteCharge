@@ -21,7 +21,7 @@ public final class Constants {
     public static Translation2d powerPortLocation = new Translation2d(15.98, 2.43);
 
     //Drivetrain
-    public static double drivetrainAcceleration = 1; //Seconds from neutral to full
+    public static double drivetrainAcceleration = 0.25; //Seconds from neutral to full
     public static double drivetrainMaxSpeed = 1;
     public static int analogEncoderMax = 885;
     public static int analogEncoderMin = 9;
@@ -56,6 +56,7 @@ public final class Constants {
     public static int visionAlignButtonNumber = 4;
     public static int climbUpButtonNumber = 6;
     public static int climbDownButtonNumber = 7;
+    public static int resetGyroButtonNumber = 5;
 
     public static double[] joystickSensitivityRange = {0.25, drivetrainMaxSpeed};
     public static double joystickDeadZone = 0.1;

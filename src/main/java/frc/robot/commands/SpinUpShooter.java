@@ -44,7 +44,7 @@ public class SpinUpShooter extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        speed = target_speed * Math.min(target_speed * timer.get(), 1);
+        speed = target_speed * Math.min(timer.get(), 1);
         shooter.setSpeed(speed);
     }
 
@@ -53,6 +53,7 @@ public class SpinUpShooter extends CommandBase {
     public void end(boolean interrupted) {
         shooter.stop();
         timer.stop();
+        System.out.println(interrupted);
     }
 
     // Returns true when the command should end.
