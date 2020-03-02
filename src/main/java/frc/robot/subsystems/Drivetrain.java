@@ -26,7 +26,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 import frc.robot.Constants;
-import frc.robot.commands.CalibrateEncoders;
+
 
 public class Drivetrain extends SubsystemBase {
     public static final double STEERING_ANGLE_TOLERANCE = 10; //In degrees
@@ -156,8 +156,6 @@ public class Drivetrain extends SubsystemBase {
             for (MotorLocation loc : MotorLocation.values()) {
                 int absEncoderPos = loc.absoluteEncoderPosAtStartup;
                 double currentRotation = (absEncoderPos - loc.absoluteEncoderZero) / Constants.analogPulsesPerRevolution;
-                System.out.println(loc.name() + " analogPos: " + absEncoderPos);
-                System.out.println(loc.name() + " analogZero: " + loc.absoluteEncoderZero);
                 int currentRelativePos = loc.steeringMotor.getSelectedSensorPosition();
                 double relativeZero = currentRelativePos - currentRotation * Constants.relativePulsesPerRevolution;
                 relativeZero = relativeZero % Constants.relativePulsesPerRevolution;

@@ -28,9 +28,8 @@ import frc.robot.subsystems.*;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-    private final Joystick primaryStick = new Joystick(0);
+    private GenericHID primaryStick;
     private final Joystick secondaryStick = new Joystick(1);
-    private final XboxController xboxController = new XboxController(0);
 
     private final Drivetrain drivetrain = new Drivetrain();
     private final Intake intake = new Intake();
@@ -57,8 +56,6 @@ public class RobotContainer {
     public static NetworkTable visionTable;
     public static NetworkTableInstance networkTableInstance;
 
-    private boolean startupCommandRun = false;
-
     /**
      * Returns the current forward input from a joystick or other input device, based on the current control mode
      *
@@ -69,10 +66,8 @@ public class RobotContainer {
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                raw_input =  -primaryStick.getY();
-                break;
             case XBOX:
-                raw_input = -xboxController.getRawAxis(1);
+                raw_input =  -primaryStick.getRawAxis(1);
                 break;
             default:
                 raw_input = 0;
@@ -94,10 +89,8 @@ public class RobotContainer {
         switch (current_input_mode) {
             case ONE_STICK:
             case TWO_STICK:
-                raw_input = primaryStick.getX();
-                break;
             case XBOX:
-                raw_input = xboxController.getRawAxis(0);
+                raw_input = primaryStick.getRawAxis(0);
                 break;
             default:
                 raw_input = 0;
@@ -119,7 +112,7 @@ public class RobotContainer {
         double sensitivity;
         switch (current_input_mode) {
             case ONE_STICK:
-                raw_input = -primaryStick.getZ();
+                raw_input = -primaryStick.getRawAxis(2);
                 sensitivity = -primaryStick.getRawAxis(3);
                 break;
             case TWO_STICK:
@@ -127,8 +120,8 @@ public class RobotContainer {
                 sensitivity = -secondaryStick.getRawAxis(2);
                 break;
             case XBOX:
-                raw_input = -xboxController.getRawAxis(4);
-                sensitivity = -xboxController.getRawAxis(3);
+                raw_input = -primaryStick.getRawAxis(4);
+                sensitivity = -primaryStick.getRawAxis(3);
                 break;
             default:
                 raw_input = 0;
@@ -137,7 +130,6 @@ public class RobotContainer {
         if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
         double sensitivityMin = Constants.joystickSensitivityRange[0];
         double sensitivityMax = Constants.joystickSensitivityRange[1];
-        System.out.println(raw_input);
         return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
     }
 
@@ -208,6 +200,13 @@ public class RobotContainer {
      * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        System.out.println("Configuring Button Bindings");
+        if (current_input_mode == INPUT_MODE.XBOX) {
+            primaryStick = new XboxController(0);
+        } else {
+            primaryStick = new Joystick(0);
+        }
+
         JoystickButton visionAlignButton;
         if (current_input_mode != INPUT_MODE.TWO_STICK) {
             visionAlignButton = new JoystickButton(primaryStick, 1);
@@ -254,6 +253,12 @@ public class RobotContainer {
         if (last_mode != current_input_mode) {
             System.out.println("Changing Input Mode");
             configureButtonBindings();
+        }
+        Command shooter_command = shooter.getCurrentCommand();
+        if (shooter_command != null) {
+            System.out.println(shooter_command.getName());
+        } else {
+            System.out.println("None");
         }
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
