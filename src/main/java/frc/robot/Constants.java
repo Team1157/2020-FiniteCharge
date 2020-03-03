@@ -58,6 +58,6 @@ public final class Constants {
     public static int climbDownButtonNumber = 7;
     public static int resetGyroButtonNumber = 5;
 
-    public static double[] joystickSensitivityRange = {0.25, drivetrainMaxSpeed};
+    public static double[] joystickSensitivityRange = {0.4, drivetrainMaxSpeed};
     public static double joystickDeadZone = 0.1;
 }

@@ -129,7 +129,7 @@ public class RobotContainer {
                 sensitivity = -secondaryStick.getRawAxis(2);
                 break;
             case XBOX:
-                sensitivity = primaryStick.getRawAxis(3);
+                sensitivity = (primaryStick.getRawAxis(3) * 2 - 1);
                 break;
             default:
                 sensitivity = 0;
