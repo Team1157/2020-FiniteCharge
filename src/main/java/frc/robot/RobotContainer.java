@@ -38,7 +38,6 @@ public class RobotContainer {
     private final VisionLights visionLights = new VisionLights();
     private final Climber climber = new Climber();
 
-    private final SendableChooser<INPUT_MODE> inputModeChooser = new SendableChooser<>();
     private final SendableChooser<Command> autoCommandChooser = new SendableChooser<>();
     private final SendableChooser<Command> fieldRelativeChooser = new SendableChooser<>();
     private final ShuffleboardTab visionDebugTab = Shuffleboard.getTab("Vision Debug");
@@ -46,7 +45,7 @@ public class RobotContainer {
             .withWidget(BuiltInWidgets.kToggleSwitch)
             .getEntry();
 
-    private INPUT_MODE current_input_mode = INPUT_MODE.ONE_STICK;
+    private INPUT_MODE input_mode = INPUT_MODE.XBOX;
     public enum INPUT_MODE {
         ONE_STICK,
         TWO_STICK,
@@ -63,7 +62,7 @@ public class RobotContainer {
      */
     private double getForwardInput() {
         double raw_input;
-        switch (current_input_mode) {
+        switch (input_mode) {
             case ONE_STICK:
             case TWO_STICK:
             case XBOX:
@@ -73,10 +72,7 @@ public class RobotContainer {
                 raw_input = 0;
         }
         if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
-        double sensitivity = -primaryStick.getRawAxis(3);
-        double sensitivityMin = Constants.joystickSensitivityRange[0];
-        double sensitivityMax = Constants.joystickSensitivityRange[1];
-        return raw_input * (sensitivityMin + ((sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2));
+        return raw_input * getSensitivity();
     }
 
     /**
@@ -86,7 +82,7 @@ public class RobotContainer {
      */
     private double getRightInput() {
         double raw_input;
-        switch (current_input_mode) {
+        switch (input_mode) {
             case ONE_STICK:
             case TWO_STICK:
             case XBOX:
@@ -96,10 +92,7 @@ public class RobotContainer {
                 raw_input = 0;
         }
         if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
-        double sensitivity = -primaryStick.getRawAxis(3);
-        double sensitivityMin = Constants.joystickSensitivityRange[0];
-        double sensitivityMax = Constants.joystickSensitivityRange[1];
-        return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
+        return raw_input * getSensitivity();
     }
 
     /**
@@ -109,28 +102,41 @@ public class RobotContainer {
      */
     private double getRotationInput() {
         double raw_input;
-        double sensitivity;
-        switch (current_input_mode) {
+        switch (input_mode) {
             case ONE_STICK:
                 raw_input = -primaryStick.getRawAxis(2);
-                sensitivity = -primaryStick.getRawAxis(3);
                 break;
             case TWO_STICK:
                 raw_input = -secondaryStick.getX();
-                sensitivity = -secondaryStick.getRawAxis(2);
                 break;
             case XBOX:
                 raw_input = -primaryStick.getRawAxis(4);
-                sensitivity = -primaryStick.getRawAxis(3);
                 break;
             default:
                 raw_input = 0;
-                sensitivity = 0;
         }
         if (Math.abs(raw_input) < Constants.joystickDeadZone) {raw_input = 0;}
+        return raw_input * getSensitivity();
+    }
+
+    double getSensitivity() {
+        double sensitivity;
+        switch (input_mode) {
+            case ONE_STICK:
+                sensitivity = -primaryStick.getRawAxis(3);
+                break;
+            case TWO_STICK:
+                sensitivity = -secondaryStick.getRawAxis(2);
+                break;
+            case XBOX:
+                sensitivity = primaryStick.getRawAxis(3);
+                break;
+            default:
+                sensitivity = 0;
+        }
         double sensitivityMin = Constants.joystickSensitivityRange[0];
         double sensitivityMax = Constants.joystickSensitivityRange[1];
-        return raw_input * (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
+        return (sensitivityMin + (sensitivity + 1) * (sensitivityMax - sensitivityMin) / 2);
     }
 
     /**
@@ -140,10 +146,6 @@ public class RobotContainer {
         networkTableInstance = NetworkTableInstance.getDefault();
         visionTable = networkTableInstance.getTable("vision");
 
-        inputModeChooser.setDefaultOption("One Stick", INPUT_MODE.ONE_STICK);
-        inputModeChooser.addOption("Two Stick", INPUT_MODE.TWO_STICK);
-        inputModeChooser.addOption("Xbox", INPUT_MODE.XBOX);
-        SmartDashboard.putData("Input Mode", inputModeChooser);
         SmartDashboard.putNumber("Y Distance to Bumper", 77.42);
         SmartDashboard.putNumber("Auto Shooter Speed", 1);
 
@@ -201,14 +203,16 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         System.out.println("Configuring Button Bindings");
-        if (current_input_mode == INPUT_MODE.XBOX) {
+
+        System.out.println(input_mode);
+        if (input_mode == INPUT_MODE.XBOX) {
             primaryStick = new XboxController(0);
         } else {
             primaryStick = new Joystick(0);
         }
 
         JoystickButton visionAlignButton;
-        if (current_input_mode != INPUT_MODE.TWO_STICK) {
+        if (input_mode != INPUT_MODE.TWO_STICK) {
             visionAlignButton = new JoystickButton(primaryStick, 1);
         } else {
             visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
@@ -248,18 +252,13 @@ public class RobotContainer {
     }
 
     void periodic() {
-        INPUT_MODE last_mode = current_input_mode;
-        current_input_mode = inputModeChooser.getSelected();
-        if (last_mode != current_input_mode) {
-            System.out.println("Changing Input Mode");
-            configureButtonBindings();
-        }
-        Command shooter_command = shooter.getCurrentCommand();
-        if (shooter_command != null) {
-            System.out.println(shooter_command.getName());
-        } else {
-            System.out.println("None");
-        }
+        SmartDashboard.putNumber("Sensitivity", getSensitivity());
+//        INPUT_MODE last_mode = input_mode;
+//
+//        if (last_mode != input_mode) {
+//            System.out.println("Changing Input Mode");
+//            configureButtonBindings();
+//        }
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
         SmartDashboard.putBoolean("Pi Online", visionTable.getEntry("FramesAvailable").getBoolean(false));

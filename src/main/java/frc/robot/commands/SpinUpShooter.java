@@ -53,7 +53,6 @@ public class SpinUpShooter extends CommandBase {
     public void end(boolean interrupted) {
         shooter.stop();
         timer.stop();
-        System.out.println(interrupted);
     }
 
     // Returns true when the command should end.
