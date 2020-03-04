@@ -28,6 +28,21 @@ public final class Constants {
     public static double analogPulsesPerRevolution = analogEncoderMax - analogEncoderMin;
     public static double relativePulsesPerRevolution = 1662.25;
 
+    //Xbox
+    public static int visionAlignButtonNumber = 6;
+    public static int resetGyroButtonNumber = 5;
+
+    //Joystick
+    public static int intakeForwardsButtonNumber = 3;
+    public static int intakeBackwardsButtonNumber = 4;
+    public static int spinUpFlywheelButtonNumber = 2;
+    public static int shootButtonNumber = 1;
+    public static int climbUpButtonNumber = 6;
+    public static int climbDownButtonNumber = 7;
+
+    public static double[] joystickSensitivityRange = {0.35, drivetrainMaxSpeed};
+    public static double joystickDeadZone = 0.1;
+
     //CAN
     public static int frontLeftDriveMotorNumber = 1;
     public static int frontRightDriveMotorNumber = 2;
@@ -48,16 +63,6 @@ public final class Constants {
     public static int backIntakeRelayPort = 2;
     public static int winchRelayPort = 3;
 
-    //Joystick
-    public static int intakeForwardsButtonNumber = 3;
-    public static int intakeBackwardsButtonNumber = 5;
-    public static int spinUpFlywheelButtonNumber = 2;
-    public static int shootButtonNumber = 1;
-    public static int visionAlignButtonNumber = 4;
-    public static int climbUpButtonNumber = 6;
-    public static int climbDownButtonNumber = 7;
-    public static int resetGyroButtonNumber = 5;
-
-    public static double[] joystickSensitivityRange = {0.4, drivetrainMaxSpeed};
-    public static double joystickDeadZone = 0.1;
+    //Analog In
+    public static int ultrasonicPort = 1;
 }

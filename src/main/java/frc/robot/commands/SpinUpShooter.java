@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Shooter;
 
 /**
- * An example command that uses an example subsystem.
+ * Gradually spins the shooter up to speed
  */
 public class SpinUpShooter extends CommandBase {
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})

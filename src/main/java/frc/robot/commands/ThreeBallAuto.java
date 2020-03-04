@@ -32,6 +32,7 @@ public class ThreeBallAuto extends SequentialCommandGroup {
         double degreesToGoal = (Math.atan2(translationToGoal.getY(), translationToGoal.getX()) + 180) % 360;
 
         addCommands(
+                new ResetGyro(drivetrain),
                 new ScheduleCommand(new RotateToAngle(drivetrain, degreesToGoal)),
                 new ScheduleCommand(new SpinUpShooter(shooter, SmartDashboard.getNumber("Auto Shooter Speed", 1))),
                 new ParallelCommandGroup(

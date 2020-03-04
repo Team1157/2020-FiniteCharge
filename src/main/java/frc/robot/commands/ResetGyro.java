@@ -15,4 +15,9 @@ public class ResetGyro extends InstantCommand {
     public void initialize() {
         drivetrain.resetGyro();
     }
+
+    @Override
+    public boolean runsWhenDisabled() {
+        return true;
+    }
 }
