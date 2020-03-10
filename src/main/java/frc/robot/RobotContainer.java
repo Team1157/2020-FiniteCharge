@@ -31,6 +31,8 @@ public class RobotContainer {
     private GenericHID primaryStick;
     private final Joystick secondaryStick = new Joystick(1);
 
+    private final Timer matchTimer = new Timer();
+
     private final Drivetrain drivetrain = new Drivetrain();
     private final Intake intake = new Intake();
     private final Shooter shooter = new Shooter();
@@ -194,7 +196,11 @@ public class RobotContainer {
         gate.setDefaultCommand(new CloseGate(gate));
         // Configure the button bindings
         configureButtonBindings();
+    }
 
+    public void startTimer() {
+        matchTimer.reset();
+        matchTimer.start();
     }
 
     /**
@@ -252,13 +258,17 @@ public class RobotContainer {
     }
 
     void periodic() {
-        SmartDashboard.putNumber("Sensitivity", getSensitivity());
-//        INPUT_MODE last_mode = input_mode;
-//
-//        if (last_mode != input_mode) {
-//            System.out.println("Changing Input Mode");
-//            configureButtonBindings();
-//        }
+        if (input_mode == INPUT_MODE.XBOX) {
+            double time = matchTimer.get();
+            if ((time > 104.25 && time < 104.5) || (time > 104.75 && time < 105)) {
+                primaryStick.setRumble(GenericHID.RumbleType.kLeftRumble, 1);
+                primaryStick.setRumble(GenericHID.RumbleType.kRightRumble, 1);
+            } else {
+                primaryStick.setRumble(GenericHID.RumbleType.kLeftRumble, 0);
+                primaryStick.setRumble(GenericHID.RumbleType.kRightRumble, 0);
+            }
+        }
+
         visionTable.getEntry("VisionDebug").setBoolean(visionDebugChooser.getBoolean(false));
 
         SmartDashboard.putBoolean("Pi Online", visionTable.getEntry("FramesAvailable").getBoolean(false));
