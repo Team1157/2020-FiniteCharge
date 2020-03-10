@@ -186,6 +186,8 @@ public class RobotContainer {
         CalibrateEncoders calibrateEncoders = new CalibrateEncoders(drivetrain);
         SmartDashboard.putData("Zero Absolute Encoders", calibrateEncoders);
 
+        SmartDashboard.putData("Climber Reverse", new Climb(climber, false));
+
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
         SmartDashboard.putData("Drivetrain", drivetrain);
 
@@ -227,10 +229,8 @@ public class RobotContainer {
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1.0));
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
-        JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbUpButtonNumber);
-        climbUpButton.whileHeld(new Climb(climber, true)); // up
-        JoystickButton climbDownButton = new JoystickButton(secondaryStick, Constants.climbDownButtonNumber);
-        climbDownButton.whileHeld(new Climb(climber, false)); // down
+        JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbButtonNumber);
+        climbUpButton.whileHeld(new Climb(climber, true));
         JoystickButton resetGyroButton = new JoystickButton(primaryStick, Constants.resetGyroButtonNumber);
         resetGyroButton.whileHeld(new ResetGyro(drivetrain));
     }

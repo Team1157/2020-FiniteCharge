@@ -22,7 +22,7 @@ public class OpenGate extends CommandBase {
 
     @Override
     public void execute() {
-        if (timer.get() >= 1) {
+        if (timer.get() >= 0.5) {
             timer.stop();
             timer.reset();
             gate.stop();
