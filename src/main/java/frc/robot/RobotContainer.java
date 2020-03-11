@@ -57,6 +57,10 @@ public class RobotContainer {
     public static NetworkTable visionTable;
     public static NetworkTableInstance networkTableInstance;
 
+    private boolean getClimberDirection() {
+        return !secondaryStick.getRawButton(Constants.reverseClimberButtonNumber);
+    }
+
     /**
      * Returns the current forward input from a joystick or other input device, based on the current control mode
      *
@@ -188,8 +192,6 @@ public class RobotContainer {
         CalibrateEncoders calibrateEncoders = new CalibrateEncoders(drivetrain);
         SmartDashboard.putData("Zero Absolute Encoders", calibrateEncoders);
 
-        SmartDashboard.putData("Climber Reverse", new Climb(climber, false));
-
         SmartDashboard.putData("Reset Gyro", new ResetGyro(drivetrain));
         SmartDashboard.putData("Drivetrain", drivetrain);
 
@@ -236,7 +238,7 @@ public class RobotContainer {
         JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
         JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbButtonNumber);
-        climbUpButton.whileHeld(new Climb(climber, true));
+        climbUpButton.whileHeld(new Climb(climber, this::getClimberDirection));
         JoystickButton resetGyroButton = new JoystickButton(primaryStick, Constants.resetGyroButtonNumber);
         resetGyroButton.whileHeld(new ResetGyro(drivetrain));
     }
