@@ -250,7 +250,7 @@ public class RobotContainer {
         JoystickButton shootButton = new JoystickButton(operatorStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
         JoystickButton climbUpButton = new JoystickButton(operatorStick, Constants.climbButtonNumber);
-        climbUpButton.whileHeld(new Climb(climber, true));
+        climbUpButton.whileHeld(new Climb(climber, this::getClimberDirection));
 
         JoystickButton resetGyroButton = new JoystickButton(primaryStick, Constants.resetGyroButtonNumber);
         resetGyroButton.whileHeld(new ResetGyro(drivetrain));
