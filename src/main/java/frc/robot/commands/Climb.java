@@ -3,19 +3,21 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Climber;
 
+import java.util.function.BooleanSupplier;
+
 public class Climb extends CommandBase {
     private Climber climber;
-    private boolean direction;
+    private BooleanSupplier getDirection;
 
 
-    public Climb(Climber climber, boolean direction) {
+    public Climb(Climber climber, BooleanSupplier getDirection) {
         this.climber = climber;
-        this.direction = direction;
+        this.getDirection = getDirection;
     }
 
     @Override
     public void execute() {
-        if (direction) {
+        if (getDirection.getAsBoolean()) {
             climber.up();
         }
         else {
