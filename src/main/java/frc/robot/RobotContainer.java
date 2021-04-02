@@ -49,8 +49,9 @@ public class RobotContainer {
 
     private INPUT_MODE input_mode = INPUT_MODE.XBOX;
     public enum INPUT_MODE {
-        ONE_STICK,
-        TWO_STICK,
+        TRUE_ONE_STICK, // Only one stick for all operations
+        ONE_STICK, // One stick for driving, one for the operator
+        TWO_STICK, // Translation and rotation split across two sticks
         XBOX
     }
 
@@ -65,6 +66,7 @@ public class RobotContainer {
     private double getForwardInput() {
         double raw_input;
         switch (input_mode) {
+            case TRUE_ONE_STICK:
             case ONE_STICK:
             case TWO_STICK:
             case XBOX:
@@ -85,6 +87,7 @@ public class RobotContainer {
     private double getRightInput() {
         double raw_input;
         switch (input_mode) {
+            case TRUE_ONE_STICK:
             case ONE_STICK:
             case TWO_STICK:
             case XBOX:
@@ -105,6 +108,7 @@ public class RobotContainer {
     private double getRotationInput() {
         double raw_input;
         switch (input_mode) {
+            case TRUE_ONE_STICK:
             case ONE_STICK:
                 raw_input = -primaryStick.getRawAxis(2);
                 break;
@@ -124,6 +128,7 @@ public class RobotContainer {
     double getSensitivity() {
         double sensitivity;
         switch (input_mode) {
+            case TRUE_ONE_STICK:
             case ONE_STICK:
                 sensitivity = -primaryStick.getRawAxis(3);
                 break;
@@ -219,24 +224,32 @@ public class RobotContainer {
             primaryStick = new Joystick(0);
         }
 
-        JoystickButton visionAlignButton;
-        if (input_mode != INPUT_MODE.TWO_STICK) {
-            visionAlignButton = new JoystickButton(primaryStick, 1);
-        } else {
-            visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
+        GenericHID operatorStick = secondaryStick;
+        if (input_mode == INPUT_MODE.TRUE_ONE_STICK) {
+            operatorStick = primaryStick;
         }
-        visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights, false));
 
-        JoystickButton intakeForwardsButton = new JoystickButton(secondaryStick, Constants.intakeForwardsButtonNumber);
+        if (input_mode != INPUT_MODE.TRUE_ONE_STICK) {
+            JoystickButton visionAlignButton;
+            if (input_mode != INPUT_MODE.TWO_STICK) {
+                visionAlignButton = new JoystickButton(primaryStick, 1);
+            } else {
+                visionAlignButton = new JoystickButton(secondaryStick, Constants.visionAlignButtonNumber);
+            }
+            visionAlignButton.whileHeld(new VisionAlign(drivetrain, visionLights, false));
+        }
+
+        JoystickButton intakeForwardsButton = new JoystickButton(operatorStick, Constants.intakeForwardsButtonNumber);
         intakeForwardsButton.whileHeld(new IntakeForwards(intake));
-        JoystickButton intakeBackwardsButton = new JoystickButton(secondaryStick, Constants.intakeBackwardsButtonNumber);
+        JoystickButton intakeBackwardsButton = new JoystickButton(operatorStick, Constants.intakeBackwardsButtonNumber);
         intakeBackwardsButton.whileHeld(new IntakeBackwards(intake));
-        JoystickButton spinUpFlywheelButton = new JoystickButton(secondaryStick, Constants.spinUpFlywheelButtonNumber);
+        JoystickButton spinUpFlywheelButton = new JoystickButton(operatorStick, Constants.spinUpFlywheelButtonNumber);
         spinUpFlywheelButton.whileHeld(new SpinUpShooter(shooter, 1.0));
-        JoystickButton shootButton = new JoystickButton(secondaryStick, Constants.shootButtonNumber);
+        JoystickButton shootButton = new JoystickButton(operatorStick, Constants.shootButtonNumber);
         shootButton.whileHeld(new OpenGate(gate));
-        JoystickButton climbUpButton = new JoystickButton(secondaryStick, Constants.climbButtonNumber);
+        JoystickButton climbUpButton = new JoystickButton(operatorStick, Constants.climbButtonNumber);
         climbUpButton.whileHeld(new Climb(climber, true));
+
         JoystickButton resetGyroButton = new JoystickButton(primaryStick, Constants.resetGyroButtonNumber);
         resetGyroButton.whileHeld(new ResetGyro(drivetrain));
     }
