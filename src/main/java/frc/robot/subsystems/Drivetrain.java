@@ -29,7 +29,7 @@ import frc.robot.Constants;
 
 
 public class Drivetrain extends SubsystemBase {
-    public static final double STEERING_ANGLE_TOLERANCE = 10; //In degrees
+    public static final double STEERING_ANGLE_TOLERANCE = 10; //The acceptable steering error for each wheel in degrees
     private final double DRIVE_ENCODER_COUNTS_PER_METER = 20 * 6.67 /(4 * 0.0254 * Math.PI);
     // 20 encoder counts/rot, 6.67:1 gear ratio, 4 inch wheel dia., 0.0254 meters per inch
 
@@ -39,16 +39,14 @@ public class Drivetrain extends SubsystemBase {
     public enum MotorLocation {
         FRONT_LEFT(
                 0,
-                new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates
-                18, // zeroPos: Zero
-                new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to SC for drive
-                new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber), // steerMotor: Reference to SC for steer
+                new Translation2d(0.269875, -0.320675), // coordinates: Wheel coordinates in meters for odometry
+                new WPI_VictorSPX(Constants.frontLeftDriveMotorNumber), // driveMotor: Reference to ESC for drive
+                new WPI_TalonSRX(Constants.frontLeftSteeringMotorNumber), // steerMotor: Reference to ESC for steer
                 new Encoder(0, 1) // driveEncoder: reference to encoder for drive CIM
         ),
         FRONT_RIGHT(
                 1,
                 new Translation2d(0.269875, 0.320675),
-                348,
                 new WPI_VictorSPX(Constants.frontRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.frontRightSteeringMotorNumber),
                 new Encoder(2, 3)
@@ -56,7 +54,6 @@ public class Drivetrain extends SubsystemBase {
         BACK_LEFT(
                 2,
                 new Translation2d(-0.269875, -0.320675),
-                313,
                 new WPI_VictorSPX(Constants.backLeftDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backLeftSteeringMotorNumber),
                 new Encoder(4, 5)
@@ -64,7 +61,6 @@ public class Drivetrain extends SubsystemBase {
         BACK_RIGHT(
                 3,
                 new Translation2d(-0.269875, 0.320675),
-                443,
                 new WPI_VictorSPX(Constants.backRightDriveMotorNumber),
                 new WPI_TalonSRX(Constants.backRightSteeringMotorNumber),
                 new Encoder(6, 7)
@@ -76,14 +72,11 @@ public class Drivetrain extends SubsystemBase {
         public final WPI_TalonSRX steeringMotor;
         public final Encoder driveEncoder;
         public boolean inverted;
-        public int absoluteEncoderZero; //The absolute encoder value when the wheel is at 0 degrees
-        public int absoluteEncoderPosAtStartup;
-        public int relativeEncoderZero; //The relative encoder position when the wheel is at 0 degrees
 
-        MotorLocation(int index, Translation2d coords, int zero, WPI_VictorSPX driveMotor, WPI_TalonSRX steeringMotor, Encoder driveEncoder) {
+        // Constructor for a MotorLocation object, used above
+        MotorLocation(int index, Translation2d coords, WPI_VictorSPX driveMotor, WPI_TalonSRX steeringMotor, Encoder driveEncoder) {
             this.index = index;
             this.coordinates = coords;
-            this.absoluteEncoderZero = zero;
             this.driveMotor = driveMotor;
             this.steeringMotor = steeringMotor;
             this.driveEncoder = driveEncoder;
@@ -91,35 +84,31 @@ public class Drivetrain extends SubsystemBase {
         }
     }
 
-    private final double PID_TOLERANCE = 3; //In degrees
-    private final PIDController rotationPIDController;
-    private final SwerveDriveKinematics kinematics;
-    private final SwerveDriveOdometry odometry;
-    private final ADXRS450_Gyro gyro = new ADXRS450_Gyro();
-    private final Timer startupTimer = new Timer();
-
-    private boolean queriedAbsoluteEncoders = false;
-    private boolean startupRoutineFinished = false;
+    private final double PID_TOLERANCE = 3; // Tolerance for the bot heading pid in degrees
+    private final PIDController rotationPIDController; // PID controller to rotate bot to target heading
+    private final SwerveDriveKinematics kinematics; // Handles math to find target wheel angles and speeds
+    private final SwerveDriveOdometry odometry; // Keeps track of robot position on field (probably unreliably)
+    private final ADXRS450_Gyro gyro = new ADXRS450_Gyro(); // Reference to the gyro on RoboRIO
 
     /**
      * Creates a new Drivetrain.
      */
     public Drivetrain() {
         //Configure the Talons for PID control
-        for (MotorLocation loc : MotorLocation.values()) {
+        for (MotorLocation loc : MotorLocation.values()) { // Loop through each swerve module
             WPI_TalonSRX talon = loc.steeringMotor;
-            talon.configFactoryDefault();
+            talon.configFactoryDefault(); // Reset all settings to default
 
-            loc.driveMotor.configFactoryDefault();
-            loc.driveMotor.setInverted(true);
-            loc.driveMotor.configOpenloopRamp(Constants.drivetrainAcceleration);
+            loc.driveMotor.configFactoryDefault();  // Reset the drive motor settings
+            loc.driveMotor.setInverted(true); // Invert the drive motor for some reason
+            loc.driveMotor.configOpenloopRamp(Constants.drivetrainAcceleration); // Limit the motor's acceleration
 
             Encoder encoder = loc.driveEncoder;
-            encoder.setReverseDirection(true);
+            encoder.setReverseDirection(true); // Invert the drive encoder for som reason
         }
-        configForAbsoluteEncoders();
+        configForRelativeEncoders();
 
-        //Create kinematics and odometry
+        //Create kinematics and odometry objects
         kinematics = new SwerveDriveKinematics(
                 MotorLocation.FRONT_LEFT.coordinates,
                 MotorLocation.FRONT_RIGHT.coordinates,
@@ -128,47 +117,32 @@ public class Drivetrain extends SubsystemBase {
         );
         odometry = new SwerveDriveOdometry(
                 kinematics,
-                getGyroRotation(),
-                new Pose2d() // Default position 0,0 - set real position on Shuffleboard?
+                getGyroRotation(), // Starting rotation
+                new Pose2d() // Default position 0,0 - set starting position on Shuffleboard?
         );
 
-        rotationPIDController = new PIDController(0, 0, 0);
+        rotationPIDController = new PIDController(0, 0, 0); // TODO: Calibrate heading pid
         rotationPIDController.setTolerance(PID_TOLERANCE);
         rotationPIDController.enableContinuousInput(0, 360);
 
         SmartDashboard.putData("Gyro", gyro);
+    }
 
-        startupTimer.reset();
-        startupTimer.start();
+    public void configForRelativeEncoders() {
+        for (MotorLocation loc : MotorLocation.values()) { // Loop through each motor encoder
+            WPI_TalonSRX talon = loc.steeringMotor;
+            talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+            talon.config_kP(0, 10); // TODO Tune this better?
+            talon.config_kD(0, 0);
+            talon.config_kI(0, 0);
+            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.relativePulsesPerRevolution));
+            talon.setInverted(true);
+        }
     }
 
     @Override
     public void periodic() {
-        //On startup encoder calibration
-        if (!queriedAbsoluteEncoders && startupTimer.get() >= 1) {
-            for (MotorLocation loc : MotorLocation.values()) {
-                loc.absoluteEncoderPosAtStartup = loc.steeringMotor.getSelectedSensorPosition();
-            }
-            configForRelativeEncoders();
-            queriedAbsoluteEncoders = true;
-        }
-        if (!startupRoutineFinished && startupTimer.get() > 1.25) {
-            for (MotorLocation loc : MotorLocation.values()) {
-                int absEncoderPos = loc.absoluteEncoderPosAtStartup;
-                double currentRotation = (absEncoderPos - loc.absoluteEncoderZero) / Constants.analogPulsesPerRevolution;
-                int currentRelativePos = loc.steeringMotor.getSelectedSensorPosition();
-                double relativeZero = currentRelativePos - currentRotation * Constants.relativePulsesPerRevolution;
-                relativeZero = relativeZero % Constants.relativePulsesPerRevolution;
-                if (relativeZero < 0) {
-                    relativeZero += Constants.relativePulsesPerRevolution;
-                }
-                loc.relativeEncoderZero = (int) relativeZero;
-            }
-
-            startupRoutineFinished = true;
-            startupTimer.stop();
-        }
-
+        // Dump debug info to Shuffleboard
         SmartDashboard.putNumber("FL Angle", getWheelDegrees(MotorLocation.FRONT_LEFT));
         SmartDashboard.putNumber("FL Encoder",  MotorLocation.FRONT_LEFT.steeringMotor.getSelectedSensorPosition());
         SmartDashboard.putNumber("FR Angle", getWheelDegrees(MotorLocation.FRONT_RIGHT));
@@ -181,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
         //SmartDashboard.putNumber("X", odometry.getPoseMeters().getTranslation().getX());
         //SmartDashboard.putNumber("Y", odometry.getPoseMeters().getTranslation().getY());
 
-        // Update Odometry
+        // Update odometry with the angle and speed of each wheel
         getOdometry().update(
             getGyroRotation(),
             getSwerveState(Drivetrain.MotorLocation.FRONT_LEFT),
@@ -197,6 +171,7 @@ public class Drivetrain extends SubsystemBase {
      * @param speed the desired motor speed, from -1 to 1
      */
     public void setDriveMotorSpeed(MotorLocation motor, double speed) {
+        // Clamp the speed from -1 to 1
         speed = Math.copySign(Math.min(Math.abs(speed), Constants.drivetrainMaxSpeed), speed);
         if (motor.inverted) {
             speed = -speed;
@@ -211,6 +186,7 @@ public class Drivetrain extends SubsystemBase {
      * @param rotation The desired angular velocity, from -1 to 1
      */
     public void arcadeDrive(double forward, double rotation) {
+        // Arcade drive only used for testing/emergencies
         double leftSpeed = forward - rotation;
         double rightSpeed = forward + rotation;
 
@@ -225,10 +201,28 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Takes the given ChassisSpeeds and applies them to the drive and steering motors
+     * @param chassisSpeeds the ChassisSpeeds to use
+     */
+    public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        // Calculates the desired state (speed and angle) for each swerve module
+        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
+
+        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+            // Set the drive motor speeds
+            setDriveMotorSpeed(loc, moduleStates[loc.index].speedMetersPerSecond / 2.0);
+
+            // Set the desired steering angles
+            double rawAngle = moduleStates[loc.index].angle.getDegrees();
+            setDesiredWheelAngle(loc, -rawAngle);
+        }
+    }
+
+    /**
      * Stop the drive motors immediately
      */
     public void stopDriveMotors() {
-        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
+        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) { // Loop through each swerve module
             setDriveMotorSpeed(loc, 0);
         }
     }
@@ -245,7 +239,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Find the displacement between the two angles with the smallest magnitude, assuming 0 degrees is equal to 360 degrees
+     * Find the displacement between two angles with the smallest magnitude, assuming 0 degrees is equal to 360 degrees
      * @param angle1 The value of the initial angle, in degrees
      * @param angle2 THe value of the final angle, in degrees
      * @return The calculated displacement, in degrees
@@ -264,13 +258,13 @@ public class Drivetrain extends SubsystemBase {
      * @return The calculated angle, in degrees, counterclockwise from the initial position, from 0 to 360
      */
     public double getWheelDegrees(MotorLocation loc) {
-        WPI_TalonSRX talon = loc.steeringMotor;
+        WPI_TalonSRX talon = loc.steeringMotor; // The encoder can be accessed through the Talon object
 
         //Get the position of the encoder, in raw units
         int encoderTicks = talon.getSelectedSensorPosition();
 
         //Convert the encoder position to a wheel angle
-        double angle =  ((encoderTicks - loc.relativeEncoderZero) / Constants.relativePulsesPerRevolution * 360) % 360;
+        double angle =  (encoderTicks / Constants.relativePulsesPerRevolution * 360) % 360;
         if (angle < 0) {angle += 360;}
         return angle;
 
@@ -280,7 +274,7 @@ public class Drivetrain extends SubsystemBase {
      * Get the angle of the wheel as Rotation2d
      */
     public Rotation2d getWheelRotation(MotorLocation wheel) {
-        return new Rotation2d(-getWheelDegrees(wheel)/180*Math.PI);
+        return new Rotation2d(-getWheelDegrees(wheel)/180*Math.PI); // Idk why there's a '-'here
     }
 
     /**
@@ -290,7 +284,7 @@ public class Drivetrain extends SubsystemBase {
      * @return Whether the wheel is within tolerance
      */
     private boolean isWheelWithinTolerance(MotorLocation wheel) {
-        return Math.abs(wheel.steeringMotor.getClosedLoopError()) < (int) (20 / 360.0 * Constants.analogPulsesPerRevolution);
+        return Math.abs(wheel.steeringMotor.getClosedLoopError()) < STEERING_ANGLE_TOLERANCE / 360.0 * Constants.relativePulsesPerRevolution;
     }
 
     /**
@@ -313,14 +307,16 @@ public class Drivetrain extends SubsystemBase {
      * @param target_angle The desired angle, in degrees, clockwise from the initial position, from 0 to 360
      */
     public void setDesiredWheelAngle(MotorLocation wheel, double target_angle) {
+        // Clamp angle from 0 to 360
         target_angle = target_angle % 360;
         if (target_angle < 0) {target_angle += 360;}
 
         WPI_TalonSRX talon = wheel.steeringMotor;
         double current_angle = getWheelDegrees(wheel);
+        // Find the shortest path to the target angle
         double displacement = getAngleDifference(current_angle, target_angle);
 
-
+        // If it's quicker, invert the drive motor and rotate to the opposite angle instead
         if (Math.abs(displacement) < 90) {
             wheel.inverted = false;
         } else {
@@ -329,6 +325,7 @@ public class Drivetrain extends SubsystemBase {
             displacement = getAngleDifference(current_angle, target_angle);
         }
 
+        // Set the pid setpoint relative the current encoder position. The actual pid loop runs on the talon itself
         int current_encoder_position = talon.getSelectedSensorPosition();
         double desiredEncoderPosition = current_encoder_position + displacement * Constants.relativePulsesPerRevolution / 360.0;
         talon.set(ControlMode.Position, desiredEncoderPosition);
@@ -338,13 +335,16 @@ public class Drivetrain extends SubsystemBase {
      * Angle the wheels perpendicular to the line connecting them to the center of the chassis, ideal for rotation in place
      */
     private void angleWheelsForRotation() {
+        // Possibly used for autonomous or vision alignment
+
+        // Cheat and have the kinematics figure out which way the wheels should point while rotating
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0, 0, -1);
         SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
 
         for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
             // Set the desired steering angles
             double rawAngle = moduleStates[loc.index].angle.getDegrees();
-            setDesiredWheelAngle(loc, -rawAngle);
+            setDesiredWheelAngle(loc, -rawAngle); // Why '-' here?
         }
     }
 
@@ -353,7 +353,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public void initRotationPID() {
         rotationPIDController.reset();
-        angleWheelsForRotation();
+        angleWheelsForRotation(); // I kinda hate that this is lumped in with initializing the pid loop
     }
 
     /**
@@ -379,8 +379,12 @@ public class Drivetrain extends SubsystemBase {
         if (currentAngle < 0) { currentAngle += 360; }
 
         double rotationSpeedRaw = rotationPIDController.calculate(currentAngle);
+        // Clamp the speed form -0.4 to 0.4
         double rotationSpeed = Math.copySign(Math.min(0.4, Math.abs(rotationSpeedRaw)), rotationSpeedRaw);
-        for (MotorLocation motorLocation: MotorLocation.values()) {
+
+        for (MotorLocation motorLocation: MotorLocation.values()) { // Loop through the swerve modules
+            // Only move the drive motors if the steering motors have reached their setpoint
+            // Call areAllWheelsWithinTolerance() for each module because screw efficiency I don't feel like fixing it
             if (areAllWheelsWithinTolerance()) {
                 setDriveMotorSpeed(motorLocation, rotationSpeed);
             } else {
@@ -405,10 +409,6 @@ public class Drivetrain extends SubsystemBase {
      */
     public boolean isRotationPIDWithinTolerance() {
         return rotationPIDController.atSetpoint();
-    }
-
-    public int getEncoderPosititon(MotorLocation pos) {
-        return pos.driveEncoder.getRaw();
     }
 
     /**
@@ -453,10 +453,6 @@ public class Drivetrain extends SubsystemBase {
         return odometry;
     }
 
-    public void updateOdometry() {
-        //odometry.update(getGyroRotation(), kinematics.toSwerveModuleStates())
-    }
-
     /**
      * Gets the state of the swerve module
      * @param module the swerve module to get the state of
@@ -467,44 +463,5 @@ public class Drivetrain extends SubsystemBase {
                 module.driveEncoder.getRate() / DRIVE_ENCODER_COUNTS_PER_METER,
                 getWheelRotation(module)
         );
-    }
-
-    /**
-     * Takes the given ChassisSpeeds and applies them to the drive and steering motors
-     * @param chassisSpeeds the ChassisSpeeds to use
-     */
-    public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-        // Calculates the desired state for each swerve module
-        SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(chassisSpeeds);
-
-
-        for (Drivetrain.MotorLocation loc : Drivetrain.MotorLocation.values()) {
-            // Set the drive motor speeds
-            setDriveMotorSpeed(loc, moduleStates[loc.index].speedMetersPerSecond / 2.0);
-
-            // Set the desired steering angles
-            double rawAngle = moduleStates[loc.index].angle.getDegrees();
-            setDesiredWheelAngle(loc, -rawAngle);
-        }
-    }
-
-    public void configForRelativeEncoders() {
-        for (MotorLocation loc : MotorLocation.values()) {
-            WPI_TalonSRX talon = loc.steeringMotor;
-            talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-            talon.config_kP(0, 10);
-            talon.config_kD(0, 0);
-            talon.config_kI(0, 0);
-            talon.configAllowableClosedloopError(0, (int) (STEERING_ANGLE_TOLERANCE / 360.0 * Constants.relativePulsesPerRevolution));
-            talon.setInverted(true);
-        }
-    }
-
-    public void configForAbsoluteEncoders() {
-        for (MotorLocation loc : MotorLocation.values()) {
-            WPI_TalonSRX talon = loc.steeringMotor;
-            talon.configSelectedFeedbackSensor(FeedbackDevice.Analog);
-            talon.configFeedbackNotContinuous(true, 0);
-        }
     }
 }

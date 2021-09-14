@@ -160,8 +160,8 @@ public class RobotContainer {
         SmartDashboard.putNumber("Y Distance to Bumper", 77.42);
         SmartDashboard.putNumber("Auto Shooter Speed", 1);
 
-        autoCommandChooser.setDefaultOption("None", null);
-        autoCommandChooser.addOption("No Vision Auto", new NoVisionAuto(drivetrain, shooter, gate, intake, visionLights));
+        autoCommandChooser.setDefaultOption("No Vision Auto", new NoVisionAuto(drivetrain, shooter, gate, intake));
+        autoCommandChooser.addOption("None", null);
         autoCommandChooser.addOption("3 Ball Auto", new ThreeBallAuto(drivetrain, shooter, gate, intake, visionLights));
         SmartDashboard.putData("Auto Command", autoCommandChooser);
 
@@ -275,7 +275,7 @@ public class RobotContainer {
     void periodic() {
         if (input_mode == INPUT_MODE.XBOX) {
             double time = matchTimer.get();
-            if ((time > 104.25 && time < 104.5) || (time > 104.75 && time < 105)) {
+            if ((104.25 < time && time < 104.5) || (104.75 < time && time < 105.0)) {
                 primaryStick.setRumble(GenericHID.RumbleType.kLeftRumble, 1);
                 primaryStick.setRumble(GenericHID.RumbleType.kRightRumble, 1);
             } else {

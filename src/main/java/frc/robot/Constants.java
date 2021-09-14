@@ -23,9 +23,6 @@ public final class Constants {
     //Drivetrain
     public static double drivetrainAcceleration = 0.25; //Seconds from neutral to full
     public static double drivetrainMaxSpeed = 1;
-    public static int analogEncoderMax = 885;
-    public static int analogEncoderMin = 9;
-    public static double analogPulsesPerRevolution = analogEncoderMax - analogEncoderMin;
     public static double relativePulsesPerRevolution = 1662.25;
 
     //Xbox
